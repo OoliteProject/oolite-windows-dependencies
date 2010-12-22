@@ -84,6 +84,7 @@ class JS_FRIEND_API(JSWrapper) : public js::JSProxyHandler {
     virtual bool construct(JSContext *cx, JSObject *wrapper, uintN argc, js::Value *argv,
                            js::Value *rval);
     virtual bool hasInstance(JSContext *cx, JSObject *wrapper, const js::Value *vp, bool *bp);
+    virtual JSType typeOf(JSContext *cx, JSObject *proxy);
     virtual JSString *obj_toString(JSContext *cx, JSObject *wrapper);
     virtual JSString *fun_toString(JSContext *cx, JSObject *wrapper, uintN indent);
 
@@ -102,6 +103,14 @@ class JS_FRIEND_API(JSWrapper) : public js::JSProxyHandler {
     static inline JSObject *wrappedObject(const JSObject *wrapper) {
         return wrapper->getProxyPrivate().toObjectOrNull();
     }
+    static inline JSWrapper *wrapperHandler(const JSObject *wrapper) {
+        return static_cast<JSWrapper *>(wrapper->getProxyHandler());
+    }
+
+    enum {
+        CROSS_COMPARTMENT = 1 << 0,
+        LAST_USED_FLAG = CROSS_COMPARTMENT
+    };
 
     static void *getWrapperFamily();
 };

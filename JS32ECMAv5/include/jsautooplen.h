@@ -77,11 +77,11 @@
 #define JSOP_LOOKUPSWITCH_LENGTH        -1
 #define JSOP_STRICTEQ_LENGTH             1
 #define JSOP_STRICTNE_LENGTH             1
-#define JSOP_SETCALL_LENGTH              3
+#define JSOP_SETCALL_LENGTH              1
 #define JSOP_ITER_LENGTH                 2
 #define JSOP_MOREITER_LENGTH             1
 #define JSOP_ENDITER_LENGTH              1
-#define JSOP_APPLY_LENGTH                3
+#define JSOP_FUNAPPLY_LENGTH             3
 #define JSOP_SWAP_LENGTH                 1
 #define JSOP_OBJECT_LENGTH               3
 #define JSOP_POP_LENGTH                  1
@@ -92,7 +92,9 @@
 #define JSOP_GETLOCAL_LENGTH             3
 #define JSOP_SETLOCAL_LENGTH             3
 #define JSOP_UINT16_LENGTH               3
-#define JSOP_NEWINIT_LENGTH              5
+#define JSOP_NEWINIT_LENGTH              3
+#define JSOP_NEWARRAY_LENGTH             4
+#define JSOP_NEWOBJECT_LENGTH            3
 #define JSOP_ENDINIT_LENGTH              1
 #define JSOP_INITPROP_LENGTH             3
 #define JSOP_INITELEM_LENGTH             1
@@ -225,7 +227,6 @@
 #define JSOP_INT8_LENGTH                 2
 #define JSOP_INT32_LENGTH                5
 #define JSOP_LENGTH_LENGTH               1
-#define JSOP_NEWARRAY_LENGTH             3
 #define JSOP_HOLE_LENGTH                 1
 #define JSOP_DEFFUN_FC_LENGTH            3
 #define JSOP_DEFLOCALFUN_FC_LENGTH       5
@@ -252,3 +253,4 @@
 #define JSOP_FORGLOBAL_LENGTH            3
 #define JSOP_BLOCKCHAIN_LENGTH           3
 #define JSOP_NULLBLOCKCHAIN_LENGTH       1
+#define JSOP_FUNCALL_LENGTH              3

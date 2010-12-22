@@ -1,6 +1,7 @@
 /* -*- Mode: C; tab-width: 8; indent-tabs-mode: nil; c-basic-offset: 4 -*-
+ * vim: set ts=4 sw=4 et tw=78:
  *
- ***** BEGIN LICENSE BLOCK *****
+ * ***** BEGIN LICENSE BLOCK *****
  * Version: MPL 1.1/GPL 2.0/LGPL 2.1
  *
  * The contents of this file are subject to the Mozilla Public License Version
@@ -13,15 +14,15 @@
  * for the specific language governing rights and limitations under the
  * License.
  *
- * The Original Code is Mozilla Communicator client code, released
- * March 31, 1998.
+ * The Original Code is SpiderMonkey code.
  *
  * The Initial Developer of the Original Code is
- * Netscape Communications Corporation.
- * Portions created by the Initial Developer are Copyright (C) 1998-1999
+ * Mozilla Corporation.
+ * Portions created by the Initial Developer are Copyright (C) 2010
  * the Initial Developer. All Rights Reserved.
  *
  * Contributor(s):
+ *   Jim Blandy <jimb@mozilla.com> (original author)
  *
  * Alternatively, the contents of this file may be used under the terms of
  * either of the GNU General Public License Version 2 or later (the "GPL"),
@@ -37,19 +38,31 @@
  *
  * ***** END LICENSE BLOCK ***** */
 
-#ifndef jscompat_h___
-#define jscompat_h___
-/*
- * Compatibility glue for various NSPR versions.  We must always define int8,
- * int16, jsword, and so on to minimize differences with js/ref, no matter what
- * the NSPR typedef names may be.
- */
-#include "jstypes.h"
-#include "jslong.h"
+#ifndef jsdbgapiinlines_h___
+#define jsdbgapiinlines_h___
 
-typedef JSIntn intN;
-typedef JSUintn uintN;
-typedef JSUword jsuword;
-typedef JSWord jsword;
-typedef float float32;
-#endif /* jscompat_h___ */
+#include "jsdbgapi.h"
+#include "jscntxt.h"
+
+#if defined(JS_HAS_OBJ_WATCHPOINT) && defined(__cplusplus)
+
+extern bool
+js_SlowPathUpdateWatchpointsForShape(JSContext *cx, JSObject *obj, const js::Shape *newShape);
+
+/*
+ * Update any watchpoints on |obj| on |new_shape->id| to use |new_shape|. Property-manipulating
+ * functions must call this any time it takes on a new shape to represent a potentially
+ * watched property, or when it mutates a shape's attributes/setter/getter.
+ */
+static inline bool
+js_UpdateWatchpointsForShape(JSContext *cx, JSObject *obj, const js::Shape *newShape)
+{
+    if (JS_CLIST_IS_EMPTY(&cx->runtime->watchPointList))
+        return true;
+
+    return js_SlowPathUpdateWatchpointsForShape(cx, obj, newShape);
+}
+
+#endif /* JS_HAS_OBJ_WATCHPOINT && __cplusplus */
+
+#endif /* jsdbgapiinlines_h__ */
