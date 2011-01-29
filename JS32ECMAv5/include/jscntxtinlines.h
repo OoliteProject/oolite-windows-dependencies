@@ -42,12 +42,12 @@
 #define jscntxtinlines_h___
 
 #include "jscntxt.h"
+#include "jscompartment.h"
 #include "jsparse.h"
 #include "jsstaticcheck.h"
 #include "jsxml.h"
 #include "jsregexp.h"
 #include "jsgc.h"
-#include "jscompartment.h"
 
 namespace js {
 
@@ -541,8 +541,16 @@ class CompartmentChecker
         JS_NOT_REACHED("compartment mismatched");
     }
 
+    /* Note: should only be used when neither c1 nor c2 may be the default compartment. */
+    static void check(JSCompartment *c1, JSCompartment *c2) {
+        JS_ASSERT(c1 != c1->rt->atomsCompartment);
+        JS_ASSERT(c2 != c2->rt->atomsCompartment);
+        if (c1 != c2)
+            fail(c1, c2);
+    }
+
     void check(JSCompartment *c) {
-        if (c && c != context->runtime->defaultCompartment) {
+        if (c && c != context->runtime->atomsCompartment) {
             if (!compartment)
                 compartment = c;
             else if (c != compartment)
@@ -591,7 +599,7 @@ class CompartmentChecker
     }
 
     void check(JSScript *script) {
-        if (script && script != JSScript::emptyScript()) {
+        if (script) {
             check(script->compartment);
             if (script->u.object)
                 check(script->u.object);
@@ -678,13 +686,13 @@ JS_ALWAYS_INLINE bool
 CallJSNative(JSContext *cx, js::Native native, uintN argc, js::Value *vp)
 {
 #ifdef DEBUG
-    JSBool alreadyThrowing = cx->throwing;
+    JSBool alreadyThrowing = cx->isExceptionPending();
 #endif
     assertSameCompartment(cx, ValueArray(vp, argc + 2));
     JSBool ok = native(cx, argc, vp);
     if (ok) {
         assertSameCompartment(cx, vp[0]);
-        JS_ASSERT_IF(!alreadyThrowing, !cx->throwing);
+        JS_ASSERT_IF(!alreadyThrowing, !cx->isExceptionPending());
     }
     return ok;
 }
@@ -753,6 +761,50 @@ CallSetter(JSContext *cx, JSObject *obj, jsid id, PropertyOp op, uintN attrs, ui
     return CallJSPropertyOpSetter(cx, op, obj, id, vp);
 }
 
+#ifdef JS_TRACER
+/*
+ * Reconstruct the JS stack and clear cx->tracecx. We must be currently in a
+ * _FAIL builtin from trace on cx or another context on the same thread. The
+ * machine code for the trace remains on the C stack when js_DeepBail returns.
+ *
+ * Implemented in jstracer.cpp.
+ */
+JS_FORCES_STACK JS_FRIEND_API(void)
+DeepBail(JSContext *cx);
+#endif
+
+static JS_INLINE void
+LeaveTraceIfGlobalObject(JSContext *cx, JSObject *obj)
+{
+    if (!obj->parent)
+        LeaveTrace(cx);
+}
+
+static JS_INLINE void
+LeaveTraceIfArgumentsObject(JSContext *cx, JSObject *obj)
+{
+    if (obj->isArguments())
+        LeaveTrace(cx);
+}
+
+static JS_INLINE JSBool
+CanLeaveTrace(JSContext *cx)
+{
+    JS_ASSERT(JS_ON_TRACE(cx));
+#ifdef JS_TRACER
+    return JS_TRACE_MONITOR(cx).bailExit != NULL;
+#else
+    return JS_FALSE;
+#endif
+}
+
 }  /* namespace js */
+
+inline void
+JSContext::setPendingException(js::Value v) {
+    this->throwing = true;
+    this->exception = v;
+    assertSameCompartment(this, v);
+}
 
 #endif /* jscntxtinlines_h___ */

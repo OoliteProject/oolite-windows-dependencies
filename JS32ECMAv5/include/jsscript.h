@@ -73,7 +73,7 @@ namespace js {
  *
  * TODO: consider giving more bits to the slot value and takings ome from the level.
  */
-class UpvarCookie 
+class UpvarCookie
 {
     uint32 value;
 
@@ -145,6 +145,8 @@ typedef struct JSConstArray {
     uint32          length;
 } JSConstArray;
 
+struct JSArenaPool;
+
 namespace js {
 
 struct GlobalSlotArray {
@@ -154,6 +156,169 @@ struct GlobalSlotArray {
     };
     Entry           *vector;
     uint32          length;
+};
+
+struct Shape;
+
+enum BindingKind { NONE, ARGUMENT, VARIABLE, CONSTANT, UPVAR };
+
+/*
+ * Formal parameters, local variables, and upvars are stored in a shape tree
+ * path encapsulated within this class.  This class represents bindings for
+ * both function and top-level scripts (the latter is needed to track names in
+ * strict mode eval code, to give such code its own lexical environment).
+ */
+class Bindings {
+    js::Shape *lastBinding;
+    uint16 nargs;
+    uint16 nvars;
+    uint16 nupvars;
+
+  public:
+    inline Bindings(JSContext *cx);
+
+    /*
+     * Transfers ownership of bindings data from bindings into this fresh
+     * Bindings instance. Once such a transfer occurs, the old bindings must
+     * not be used again.
+     */
+    inline void transfer(JSContext *cx, Bindings *bindings);
+
+    /*
+     * Clones bindings data from bindings, which must be immutable, into this
+     * fresh Bindings instance. A Bindings instance may be cloned multiple
+     * times.
+     */
+    inline void clone(JSContext *cx, Bindings *bindings);
+
+    uint16 countArgs() const { return nargs; }
+    uint16 countVars() const { return nvars; }
+    uint16 countUpvars() const { return nupvars; }
+
+    uintN countArgsAndVars() const { return nargs + nvars; }
+
+    uintN countLocalNames() const { return nargs + nvars + nupvars; }
+
+    bool hasUpvars() const { return nupvars > 0; }
+    bool hasLocalNames() const { return countLocalNames() > 0; }
+
+    /* Returns the shape lineage generated for these bindings. */
+    inline const js::Shape *lastShape() const;
+
+    enum {
+        /*
+         * A script may have no more than this many arguments, variables, or
+         * upvars.
+         */
+        BINDING_COUNT_LIMIT = 0xFFFF
+    };
+
+    /*
+     * Add a local binding for the given name, of the given type, for the code
+     * being compiled.  If fun is non-null, this binding set is being created
+     * for that function, so adjust corresponding metadata in that function
+     * while adding.  Otherwise this set must correspond to a top-level script.
+     *
+     * A binding may be added twice with different kinds; the last one for a
+     * given name prevails.  (We preserve both bindings for the decompiler,
+     * which must deal with such cases.)  Pass null for name when indicating a
+     * destructuring argument.  Return true on success.
+     *
+     * The parser builds shape paths for functions, usable by Call objects at
+     * runtime, by calling an "add" method. All ARGUMENT bindings must be added
+     * before before any VARIABLE or CONSTANT bindings, which themselves must
+     * be added before all UPVAR bindings.
+     */
+    bool add(JSContext *cx, JSAtom *name, BindingKind kind);
+
+    /* Convenience specializations. */
+    bool addVariable(JSContext *cx, JSAtom *name) {
+        return add(cx, name, VARIABLE);
+    }
+    bool addConstant(JSContext *cx, JSAtom *name) {
+        return add(cx, name, CONSTANT);
+    }
+    bool addUpvar(JSContext *cx, JSAtom *name) {
+        return add(cx, name, UPVAR);
+    }
+    bool addArgument(JSContext *cx, JSAtom *name, uint16 *slotp) {
+        JS_ASSERT(name != NULL); /* not destructuring */
+        *slotp = nargs;
+        return add(cx, name, ARGUMENT);
+    }
+    bool addDestructuring(JSContext *cx, uint16 *slotp) {
+        *slotp = nargs;
+        return add(cx, NULL, ARGUMENT);
+    }
+
+    /*
+     * Look up an argument or variable name, returning its kind when found or
+     * NONE when no such name exists. When indexp is not null and the name
+     * exists, *indexp will receive the index of the corresponding argument or
+     * variable.
+     */
+    BindingKind lookup(JSContext *cx, JSAtom *name, uintN *indexp) const;
+
+    /* Convenience method to check for any binding for a name. */
+    bool hasBinding(JSContext *cx, JSAtom *name) const {
+        return lookup(cx, name, NULL) != NONE;
+    }
+
+    /*
+     * If this binding set for the given function includes duplicated argument
+     * names, return an arbitrary duplicate name.  Otherwise, return NULL.
+     */
+    JSAtom *findDuplicateArgument() const;
+
+    /*
+     * Function and macros to work with local names as an array of words.
+     * getLocalNameArray returns the array, or null if we are out of memory.
+     * This function must be called only when hasLocalNames().
+     *
+     * The supplied pool is used to allocate the returned array, so the caller
+     * is obligated to mark and release to free it.
+     *
+     * The elements of the array with index less than nargs correspond to the
+     * the names of arguments. An index >= nargs addresses a var binding. Use
+     * JS_LOCAL_NAME_TO_ATOM to convert array's element to an atom pointer.
+     * This pointer can be null when the element is for an argument
+     * corresponding to a destructuring pattern.
+     *
+     * If nameWord does not name an argument, use JS_LOCAL_NAME_IS_CONST to
+     * check if nameWord corresponds to the const declaration.
+     */
+    jsuword *
+    getLocalNameArray(JSContext *cx, JSArenaPool *pool);
+
+    /*
+     * Returns the slot where the sharp array is stored, or a value < 0 if no
+     * sharps are present or in case of failure.
+     */
+    int sharpSlotBase(JSContext *cx);
+
+    /*
+     * Protect stored bindings from mutation.  Subsequent attempts to add
+     * bindings will copy the existing bindings before adding to them, allowing
+     * the original bindings to be safely shared.
+     */
+    void makeImmutable();
+
+    /*
+     * These methods provide direct access to the shape path normally
+     * encapsulated by js::Bindings. These methods may be used to make a
+     * Shape::Range for iterating over the relevant shapes from youngest to
+     * oldest (i.e., last or right-most to first or left-most in source order).
+     *
+     * Sometimes iteration order must be from oldest to youngest, however. For
+     * such cases, use js::Bindings::getLocalNameArray. The RAII class
+     * js::AutoLocalNameArray, defined in jscntxt.h, should be used where
+     * possible instead of direct calls to getLocalNameArray.
+     */
+    const js::Shape *lastArgument() const;
+    const js::Shape *lastVariable() const;
+    const js::Shape *lastUpvar() const;
+
+    void trace(JSTracer *trc);
 };
 
 } /* namespace js */
@@ -198,12 +363,6 @@ struct JSScript {
      * to the newly made script's function, if any -- so callers of NewScript
      * are responsible for notifying the debugger after successfully creating any
      * kind (function or other) of new JSScript.
-     *
-     * NB: NewScript always creates a new script; it never returns the empty
-     * script singleton (JSScript::emptyScript()). Callers who know they can use
-     * that read-only singleton are responsible for choosing it instead of calling
-     * NewScript with length and nsrcnotes equal to 1 and other parameters save
-     * cx all zero.
      */
     static JSScript *NewScript(JSContext *cx, uint32 length, uint32 nsrcnotes, uint32 natoms,
                                uint32 nobjects, uint32 nupvars, uint32 nregexps,
@@ -219,19 +378,22 @@ struct JSScript {
     uint16          version;    /* JS version under which script was compiled */
     uint16          nfixed;     /* number of slots besides stack operands in
                                    slot array */
+
+    /*
+     * Offsets to various array structures from the end of this script, or
+     * JSScript::INVALID_OFFSET if the array has length 0.
+     */
     uint8           objectsOffset;  /* offset to the array of nested function,
                                        block, scope, xml and one-time regexps
-                                       objects or 0 if none */
+                                       objects */
     uint8           upvarsOffset;   /* offset of the array of display ("up")
-                                       closure vars or 0 if none */
+                                       closure vars */
     uint8           regexpsOffset;  /* offset to the array of to-be-cloned
-                                       regexps or 0 if none. */
-    uint8           trynotesOffset; /* offset to the array of try notes or
-                                       0 if none */
-    uint8           globalsOffset;  /* offset to the array of global slots or
-                                       0 if none */
-    uint8           constOffset;    /* offset to the array of constants or
-                                       0 if none */
+                                       regexps  */
+    uint8           trynotesOffset; /* offset to the array of try notes */
+    uint8           globalsOffset;  /* offset to the array of global slots */
+    uint8           constOffset;    /* offset to the array of constants */
+
     bool            noScriptRval:1; /* no need for result value of last
                                        expression statement */
     bool            savedCallerFun:1; /* object 0 is caller function */
@@ -243,8 +405,10 @@ struct JSScript {
     bool            warnedAboutTwoArgumentEval:1; /* have warned about use of
                                                      obsolete eval(s, o) in
                                                      this script */
+    bool            hasSingletons:1;  /* script has singleton objects */
 #ifdef JS_METHODJIT
     bool            debugMode:1;      /* script was compiled in debug mode */
+    bool            singleStepMode:1; /* compile script in single-step mode */
 #endif
 
     jsbytecode      *main;      /* main entry point, after predef'ing prolog */
@@ -256,6 +420,8 @@ struct JSScript {
     uint16          staticLevel;/* static level for display maintenance */
     uint16          nClosedArgs; /* number of args which are closed over. */
     uint16          nClosedVars; /* number of vars which are closed over. */
+    js::Bindings    bindings;   /* names of top-level variables in this script
+                                   (and arguments if this is a function script) */
     JSPrincipals    *principals;/* principals for this script */
     union {
         /*
@@ -264,7 +430,7 @@ struct JSScript {
          *   JS_CompileFile, etc.) have these objects.
          * - Function scripts never have script objects; such scripts are owned
          *   by their function objects.
-         * - Temporary scripts created by obj_eval, JS_EvaluateScript, and 
+         * - Temporary scripts created by obj_eval, JS_EvaluateScript, and
          *   similar functions never have these objects; such scripts are
          *   explicitly destroyed by the code that created them.
          * Debugging API functions (JSDebugHooks::newScriptHook;
@@ -322,34 +488,37 @@ struct JSScript {
     /* Script notes are allocated right after the code. */
     jssrcnote *notes() { return (jssrcnote *)(code + length); }
 
+    static const uint8 INVALID_OFFSET = 0xFF;
+    static bool isValidOffset(uint8 offset) { return offset != INVALID_OFFSET; }
+
     JSObjectArray *objects() {
-        JS_ASSERT(objectsOffset != 0);
-        return (JSObjectArray *)((uint8 *) this + objectsOffset);
+        JS_ASSERT(isValidOffset(objectsOffset));
+        return (JSObjectArray *)((uint8 *) (this + 1) + objectsOffset);
     }
 
     JSUpvarArray *upvars() {
-        JS_ASSERT(upvarsOffset != 0);
-        return (JSUpvarArray *) ((uint8 *) this + upvarsOffset);
+        JS_ASSERT(isValidOffset(upvarsOffset));
+        return (JSUpvarArray *) ((uint8 *) (this + 1) + upvarsOffset);
     }
 
     JSObjectArray *regexps() {
-        JS_ASSERT(regexpsOffset != 0);
-        return (JSObjectArray *) ((uint8 *) this + regexpsOffset);
+        JS_ASSERT(isValidOffset(regexpsOffset));
+        return (JSObjectArray *) ((uint8 *) (this + 1) + regexpsOffset);
     }
 
     JSTryNoteArray *trynotes() {
-        JS_ASSERT(trynotesOffset != 0);
-        return (JSTryNoteArray *) ((uint8 *) this + trynotesOffset);
+        JS_ASSERT(isValidOffset(trynotesOffset));
+        return (JSTryNoteArray *) ((uint8 *) (this + 1) + trynotesOffset);
     }
 
     js::GlobalSlotArray *globals() {
-        JS_ASSERT(globalsOffset != 0);
-        return (js::GlobalSlotArray *) ((uint8 *)this + globalsOffset);
+        JS_ASSERT(isValidOffset(globalsOffset));
+        return (js::GlobalSlotArray *) ((uint8 *) (this + 1) + globalsOffset);
     }
 
     JSConstArray *consts() {
-        JS_ASSERT(constOffset != 0);
-        return (JSConstArray *) ((uint8 *) this + constOffset);
+        JS_ASSERT(isValidOffset(constOffset));
+        return (JSConstArray *) ((uint8 *) (this + 1) + constOffset);
     }
 
     JSAtom *getAtom(size_t index) {
@@ -397,19 +566,9 @@ struct JSScript {
     /*
      * The isEmpty method tells whether this script has code that computes any
      * result (not return value, result AKA normal completion value) other than
-     * JSVAL_VOID, or any other effects. It has a fast path for the case where
-     * |this| is the emptyScript singleton, but it also checks this->length and
-     * this->code, to handle debugger-generated mutable empty scripts.
+     * JSVAL_VOID, or any other effects.
      */
     inline bool isEmpty() const;
-
-    /*
-     * Accessor for the emptyScriptConst singleton, to consolidate const_cast.
-     * See the private member declaration.
-     */
-    static JSScript *emptyScript() {
-        return const_cast<JSScript *>(&emptyScriptConst);
-    }
 
     uint32 getClosedArg(uint32 index) {
         JS_ASSERT(index < nClosedArgs);
@@ -422,16 +581,6 @@ struct JSScript {
     }
 
     void copyClosedSlotsTo(JSScript *other);
-
-  private:
-    /*
-     * Use const to put this in read-only memory if possible. We are stuck with
-     * non-const JSScript * and jsbytecode * by legacy code (back in the 1990s,
-     * const wasn't supported correctly on all target platforms). The debugger
-     * does mutate bytecode, and script->u.object may be set after construction
-     * in some cases, so making JSScript pointers const will be "hard".
-     */
-    static const JSScript emptyScriptConst;
 };
 
 #define SHARP_NSLOTS            2       /* [#array, #depth] slots if the script
@@ -522,7 +671,7 @@ js_DestroyScript(JSContext *cx, JSScript *script);
  * from that thread.
  */
 extern void
-js_DestroyScriptFromGC(JSContext *cx, JSScript *script, JSThreadData *data);
+js_DestroyScriptFromGC(JSContext *cx, JSScript *script);
 
 extern void
 js_TraceScript(JSTracer *trc, JSScript *script);
@@ -575,18 +724,11 @@ js_CloneScript(JSContext *cx, JSScript *script);
  * If magic is null, js_XDRScript returns false on bad magic number errors,
  * which it reports.
  *
- * NB: after a successful JSXDR_DECODE, and provided that *scriptp is not the
- * JSScript::emptyScript() immutable singleton, js_XDRScript callers must do
- * any required subsequent set-up of owning function or script object and then
- * call js_CallNewScriptHook.
- *
- * If the caller requires a mutable empty script (for debugging or u.object
- * ownership setting), pass true for needMutableScript. Otherwise pass false.
- * Call js_CallNewScriptHook only with a mutable script, i.e. never with the
- * JSScript::emptyScript() singleton.
+ * NB: after a successful JSXDR_DECODE, js_XDRScript callers must do any
+ * required subsequent set-up of owning function or script object and then call
+ * js_CallNewScriptHook.
  */
 extern JSBool
-js_XDRScript(JSXDRState *xdr, JSScript **scriptp, bool needMutableScript,
-             JSBool *hasMagic);
+js_XDRScript(JSXDRState *xdr, JSScript **scriptp, JSBool *hasMagic);
 
 #endif /* jsscript_h___ */

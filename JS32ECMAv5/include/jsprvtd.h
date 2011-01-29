@@ -92,6 +92,7 @@ typedef struct JSTreeContext        JSTreeContext;
 typedef struct JSTryNote            JSTryNote;
 
 /* Friend "Advanced API" typedefs. */
+typedef struct JSLinearString       JSLinearString;
 typedef struct JSAtom               JSAtom;
 typedef struct JSAtomList           JSAtomList;
 typedef struct JSAtomListElement    JSAtomListElement;
@@ -134,6 +135,7 @@ struct TraceMonitor;
 class StackSpace;
 class StackSegment;
 class FrameRegsIter;
+class StringBuffer;
 
 struct Compiler;
 struct Parser;
@@ -171,9 +173,6 @@ struct Shape;
 struct EmptyShape;
 
 } /* namespace js */
-
-/* Common instantiations. */
-typedef js::Vector<jschar, 32> JSCharBuffer;
 
 } /* export "C++" */
 #endif  /* __cplusplus */

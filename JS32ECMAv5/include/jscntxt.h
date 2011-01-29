@@ -122,10 +122,6 @@ template<typename T> class Seq;
 
 }  /* namespace nanojit */
 
-namespace JSC {
-    class ExecutableAllocator;
-}
-
 namespace js {
 
 /* Tracer constants. */
@@ -140,8 +136,6 @@ static const size_t MAX_SLOW_NATIVE_EXTRA_SLOTS = 16;
 /* Forward declarations of tracer types. */
 class VMAllocator;
 class FrameInfoCache;
-struct REHashFn;
-struct REHashKey;
 struct FrameInfo;
 struct VMSideExit;
 struct TreeFragment;
@@ -149,8 +143,6 @@ struct TracerState;
 template<typename T> class Queue;
 typedef Queue<uint16> SlotList;
 class TypeMap;
-struct REFragment;
-typedef nanojit::HashMap<REHashKey, REFragment*, REHashFn> REHashMap;
 class LoopProfile;
 
 #if defined(JS_JIT_SPEW) || defined(DEBUG)
@@ -181,69 +173,6 @@ class ContextAllocPolicy
     void free(void *p);
     void *realloc(void *p, size_t bytes);
     void reportAllocOverflow() const;
-};
-
-/* Holds the execution state during trace execution. */
-struct TracerState
-{
-    JSContext*     cx;                  // current VM context handle
-    double*        stackBase;           // native stack base
-    double*        sp;                  // native stack pointer, stack[0] is spbase[0]
-    double*        eos;                 // first unusable word after the native stack / begin of globals
-    FrameInfo**    callstackBase;       // call stack base
-    void*          sor;                 // start of rp stack
-    FrameInfo**    rp;                  // call stack pointer
-    void*          eor;                 // first unusable word after the call stack
-    VMSideExit*    lastTreeExitGuard;   // guard we exited on during a tree call
-    VMSideExit*    lastTreeCallGuard;   // guard we want to grow from if the tree
-                                        // call exit guard mismatched
-    void*          rpAtLastTreeCall;    // value of rp at innermost tree call guard
-    VMSideExit*    outermostTreeExitGuard; // the last side exit returned by js_CallTree
-    TreeFragment*  outermostTree;       // the outermost tree we initially invoked
-    uintN*         inlineCallCountp;    // inline call count counter
-    VMSideExit**   innermostNestedGuardp;
-    VMSideExit*    innermost;
-    uint64         startTime;
-    TracerState*   prev;
-
-    // Used by _FAIL builtins; see jsbuiltins.h. The builtin sets the
-    // JSBUILTIN_BAILED bit if it bails off trace and the JSBUILTIN_ERROR bit
-    // if an error or exception occurred.
-    uint32         builtinStatus;
-
-    // Used to communicate the location of the return value in case of a deep bail.
-    double*        deepBailSp;
-
-    // Used when calling natives from trace to root the vp vector.
-    uintN          nativeVpLen;
-    js::Value*     nativeVp;
-
-    TracerState(JSContext *cx, TraceMonitor *tm, TreeFragment *ti,
-                uintN &inlineCallCountp, VMSideExit** innermostNestedGuardp);
-    ~TracerState();
-};
-
-/*
- * Storage for the execution state and store during trace execution. Generated
- * code depends on the fact that the globals begin |MAX_NATIVE_STACK_SLOTS|
- * doubles after the stack begins. Thus, on trace, |TracerState::eos| holds a
- * pointer to the first global.
- */
-struct TraceNativeStorage
-{
-    double stack_global_buf[MAX_NATIVE_STACK_SLOTS + GLOBAL_SLOTS_BUFFER_SIZE];
-    FrameInfo *callstack_buf[MAX_CALL_STACK_ENTRIES];
-
-    double *stack() { return stack_global_buf; }
-    double *global() { return stack_global_buf + MAX_NATIVE_STACK_SLOTS; }
-    FrameInfo **callstack() { return callstack_buf; }
-};
-
-/* Holds data to track a single globa. */
-struct GlobalState {
-    JSObject*               globalObj;
-    uint32                  globalShape;
-    SlotList*               globalSlots;
 };
 
 /*
@@ -884,147 +813,6 @@ private:
     JSStackFrame *curfp;
 };
 
-/* Holds the number of recording attemps for an address. */
-typedef HashMap<jsbytecode*,
-                size_t,
-                DefaultHasher<jsbytecode*>,
-                SystemAllocPolicy> RecordAttemptMap;
-
-/* Holds the profile data for loops. */
-typedef HashMap<jsbytecode*,
-                LoopProfile*,
-                DefaultHasher<jsbytecode*>,
-                SystemAllocPolicy> LoopProfileMap;
-
-class Oracle;
-
-typedef HashSet<JSScript *,
-                DefaultHasher<JSScript *>,
-                SystemAllocPolicy> TracedScriptSet;
-
-/*
- * Trace monitor. Every JSThread (if JS_THREADSAFE) or JSRuntime (if not
- * JS_THREADSAFE) has an associated trace monitor that keeps track of loop
- * frequencies for all JavaScript code loaded into that runtime.
- */
-struct TraceMonitor {
-    /*
-     * The context currently executing JIT-compiled code on this thread, or
-     * NULL if none. Among other things, this can in certain cases prevent
-     * last-ditch GC and suppress calls to JS_ReportOutOfMemory.
-     *
-     * !tracecx && !recorder: not on trace
-     * !tracecx && recorder: recording
-     * tracecx && !recorder: executing a trace
-     * tracecx && recorder: executing inner loop, recording outer loop
-     */
-    JSContext               *tracecx;
-
-    /*
-     * Cached storage to use when executing on trace. While we may enter nested
-     * traces, we always reuse the outer trace's storage, so never need more
-     * than of these.
-     */
-    TraceNativeStorage      *storage;
-
-    /*
-     * There are 4 allocators here.  This might seem like overkill, but they
-     * have different lifecycles, and by keeping them separate we keep the
-     * amount of retained memory down significantly.  They are flushed (ie.
-     * all the allocated memory is freed) periodically.
-     *
-     * - dataAlloc has the lifecycle of the monitor.  It's flushed only when
-     *   the monitor is flushed.  It's used for fragments.
-     *
-     * - traceAlloc has the same flush lifecycle as the dataAlloc, but it is
-     *   also *marked* when a recording starts and rewinds to the mark point
-     *   if recording aborts.  So you can put things in it that are only
-     *   reachable on a successful record/compile cycle like GuardRecords and
-     *   SideExits.
-     *
-     * - tempAlloc is flushed after each recording, successful or not.  It's
-     *   used to store LIR code and for all other elements in the LIR
-     *   pipeline.
-     *
-     * - codeAlloc has the same lifetime as dataAlloc, but its API is
-     *   different (CodeAlloc vs. VMAllocator).  It's used for native code.
-     *   It's also a good idea to keep code and data separate to avoid I-cache
-     *   vs. D-cache issues.
-     */
-    VMAllocator*            dataAlloc;
-    VMAllocator*            traceAlloc;
-    VMAllocator*            tempAlloc;
-    nanojit::CodeAlloc*     codeAlloc;
-    nanojit::Assembler*     assembler;
-    FrameInfoCache*         frameCache;
-
-    /* This gets incremented every time the monitor is flushed. */
-    uintN                   flushEpoch;
-
-    Oracle*                 oracle;
-    TraceRecorder*          recorder;
-
-    /* If we are profiling a loop, this tracks the current profile. Otherwise NULL. */
-    LoopProfile*            profile;
-
-    GlobalState             globalStates[MONITOR_N_GLOBAL_STATES];
-    TreeFragment*           vmfragments[FRAGMENT_TABLE_SIZE];
-    RecordAttemptMap*       recordAttempts;
-
-    /* A hashtable mapping PC values to loop profiles for those loops. */
-    LoopProfileMap*         loopProfiles;
-
-    /*
-     * Maximum size of the code cache before we start flushing. 1/16 of this
-     * size is used as threshold for the regular expression code cache.
-     */
-    uint32                  maxCodeCacheBytes;
-
-    /*
-     * If nonzero, do not flush the JIT cache after a deep bail. That would
-     * free JITted code pages that we will later return to. Instead, set the
-     * needFlush flag so that it can be flushed later.
-     */
-    JSBool                  needFlush;
-
-    /*
-     * Fragment map for the regular expression compiler.
-     */
-    REHashMap*              reFragments;
-
-    // Cached temporary typemap to avoid realloc'ing every time we create one.
-    // This must be used in only one place at a given time. It must be cleared
-    // before use.
-    TypeMap*                cachedTempTypeMap;
-
-    /* Scripts with recorded fragments. */
-    TracedScriptSet         tracedScripts;
-
-#ifdef DEBUG
-    /* Fields needed for fragment/guard profiling. */
-    nanojit::Seq<nanojit::Fragment*>* branches;
-    uint32                  lastFragID;
-    /*
-     * profAlloc has a lifetime which spans exactly from js_InitJIT to
-     * js_FinishJIT.
-     */
-    VMAllocator*            profAlloc;
-    FragStatsMap*           profTab;
-#endif
-
-    bool ontrace() const {
-        return !!tracecx;
-    }
-
-    /* Flush the JIT cache. */
-    void flush();
-
-    /* Sweep any cache entry pointing to dead GC things. */
-    void sweep();
-
-    bool outOfMemory() const;
-};
-
 } /* namespace js */
 
 /*
@@ -1033,32 +821,15 @@ struct TraceMonitor {
  * executing.  cx must be a context on the current thread.
  */
 #ifdef JS_TRACER
-# define JS_ON_TRACE(cx)            (JS_TRACE_MONITOR(cx).ontrace())
+# define JS_ON_TRACE(cx)            (cx->compartment && JS_TRACE_MONITOR(cx).ontrace())
 #else
 # define JS_ON_TRACE(cx)            false
-#endif
-
-/* Number of potentially reusable scriptsToGC to search for the eval cache. */
-#ifndef JS_EVAL_CACHE_SHIFT
-# define JS_EVAL_CACHE_SHIFT        6
-#endif
-#define JS_EVAL_CACHE_SIZE          JS_BIT(JS_EVAL_CACHE_SHIFT)
-
-#ifdef DEBUG
-# define EVAL_CACHE_METER_LIST(_)   _(probe), _(hit), _(step), _(noscope)
-# define identity(x)                x
-
-struct JSEvalCacheMeter {
-    uint64 EVAL_CACHE_METER_LIST(identity);
-};
-
-# undef identity
 #endif
 
 #ifdef DEBUG
 # define FUNCTION_KIND_METER_LIST(_)                                          \
                         _(allfun), _(heavy), _(nofreeupvar), _(onlyfreevar),  \
-                        _(display), _(flat), _(setupvar), _(badfunarg),       \
+                        _(flat), _(badfunarg),                                \
                         _(joinedsetmethod), _(joinedinitmethod),              \
                         _(joinedreplace), _(joinedsort), _(joinedmodulepat),  \
                         _(mreadbarrier), _(mwritebarrier), _(mwslotbarrier),  \
@@ -1076,10 +847,6 @@ struct JSFunctionMeter {
 # define JS_FUNCTION_METER(cx,x) ((void)0)
 #endif
 
-
-#define NATIVE_ITER_CACHE_LOG2  8
-#define NATIVE_ITER_CACHE_MASK  JS_BITMASK(NATIVE_ITER_CACHE_LOG2)
-#define NATIVE_ITER_CACHE_SIZE  JS_BIT(NATIVE_ITER_CACHE_LOG2)
 
 struct JSPendingProxyOperation {
     JSPendingProxyOperation *next;
@@ -1118,18 +885,8 @@ struct JSThreadData {
     js::PropertyCache   propertyCache;
 
 #ifdef JS_TRACER
-    /* Trace-tree JIT recorder/interpreter state. */
-    js::TraceMonitor    traceMonitor;
-
-    /* Counts the number of iterations run by a trace. */
-    unsigned            iterationCounter;
-#endif
-
-    /* Lock-free hashed lists of scripts created by eval to garbage-collect. */
-    JSScript            *scriptsToGC[JS_EVAL_CACHE_SIZE];
-
-#ifdef DEBUG
-    JSEvalCacheMeter    evalCacheMeter;
+    /* Maximum size of the tracer's code cache before we start flushing. */
+    uint32              maxCodeCacheBytes;
 #endif
 
     /* State used by dtoa.c. */
@@ -1149,12 +906,6 @@ struct JSThreadData {
         JSString *s;        // if s==NULL, d and base are not valid
     } dtoaCache;
 
-    /* Cached native iterators. */
-    JSObject            *cachedNativeIterators[NATIVE_ITER_CACHE_SIZE];
-
-    /* Native iterator most recently started. */
-    JSObject            *lastNativeIterator;
-
     /* Base address of the native stack for the current thread. */
     jsuword             *nativeStackBase;
 
@@ -1162,16 +913,6 @@ struct JSThreadData {
     JSPendingProxyOperation *pendingProxyOperation;
 
     js::ConservativeGCThreadData conservativeGC;
-
-  private:
-    js::MathCache       *mathCache;
-
-    js::MathCache *allocMathCache(JSContext *cx);
-  public:
-
-    js::MathCache *getMathCache(JSContext *cx) {
-        return mathCache ? mathCache : allocMathCache(cx);
-    }
 
     bool init();
     void finish();
@@ -1262,9 +1003,9 @@ typedef js::Vector<JSCompartment *, 0, js::SystemAllocPolicy> WrapperVector;
 
 struct JSRuntime {
     /* Default compartment. */
-    JSCompartment       *defaultCompartment;
+    JSCompartment       *atomsCompartment;
 #ifdef JS_THREADSAFE
-    bool                defaultCompartmentIsLocked;
+    bool                atomsCompartmentIsLocked;
 #endif
 
     /* List of compartments (protected by the GC lock). */
@@ -1322,7 +1063,18 @@ struct JSRuntime {
     uint32              gcNumber;
     js::GCMarker        *gcMarkingTracer;
     uint32              gcTriggerFactor;
-    volatile JSBool     gcIsNeeded;
+    int64               gcJitReleaseTime;
+    JSGCMode            gcMode;
+    volatile bool       gcIsNeeded;
+
+    /*
+     * Compartment that triggered GC. If more than one Compatment need GC,
+     * gcTriggerCompartment is reset to NULL and a global GC is performed. 
+     */
+    JSCompartment       *gcTriggerCompartment;
+
+    /* Compartment that is currently involved in per-compartment GC */
+    JSCompartment       *gcCurrentCompartment;
 
     /*
      * We can pack these flags as only the GC thread writes to them. Atomic
@@ -1369,7 +1121,7 @@ struct JSRuntime {
     js::Value           negativeInfinityValue;
     js::Value           positiveInfinityValue;
 
-    JSString            *emptyString;
+    JSFlatString        *emptyString;
 
     /* List of active contexts sharing this runtime; protected by gcLock. */
     JSCList             contextList;
@@ -1626,7 +1378,10 @@ struct JSRuntime {
     JSWrapObjectCallback wrapObjectCallback;
     JSPreWrapCallback    preWrapObjectCallback;
 
-    JSC::ExecutableAllocator *regExpAllocator;
+#ifdef JS_METHODJIT
+    uint32               mjitMemoryUsed;
+#endif
+    uint32               stringMemoryUsed;
 
     JSRuntime();
     ~JSRuntime();
@@ -1725,14 +1480,6 @@ struct JSRuntime {
 /* Common macros to access thread-local caches in JSThread or JSRuntime. */
 #define JS_GSN_CACHE(cx)        (JS_THREAD_DATA(cx)->gsnCache)
 #define JS_PROPERTY_CACHE(cx)   (JS_THREAD_DATA(cx)->propertyCache)
-#define JS_TRACE_MONITOR(cx)    (JS_THREAD_DATA(cx)->traceMonitor)
-#define JS_SCRIPTS_TO_GC(cx)    (JS_THREAD_DATA(cx)->scriptsToGC)
-
-#ifdef DEBUG
-# define EVAL_CACHE_METER(x)    (JS_THREAD_DATA(cx)->evalCacheMeter.x++)
-#else
-# define EVAL_CACHE_METER(x)    ((void) 0)
-#endif
 
 #ifdef DEBUG
 # define JS_RUNTIME_METER(rt, which)    JS_ATOMIC_INCREMENT(&(rt)->which)
@@ -1901,6 +1648,10 @@ struct JSContext
     JSVersion           versionOverride;     /* supercedes defaultVersion when valid */
     bool                hasVersionOverride;
 
+    /* Exception state -- the exception member is a GC root by definition. */
+    JSBool              throwing;           /* is there a pending exception? */
+    js::Value           exception;          /* most-recently-thrown exception */
+
   public:
     /* Per-context options. */
     uint32              options;            /* see jsapi.h for JSOPTION_* */
@@ -1921,10 +1672,6 @@ struct JSContext
      * NB: generatingError packs with throwing below.
      */
     JSPackedBool        generatingError;
-
-    /* Exception state -- the exception member is a GC root by definition. */
-    JSBool              throwing;           /* is there a pending exception? */
-    js::Value           exception;          /* most-recently-thrown exception */
 
     /* Limit pointer for checking native stack consumption during recursion. */
     jsuword             stackLimit;
@@ -1964,6 +1711,7 @@ struct JSContext
     friend bool js::Interpret(JSContext *, JSStackFrame *, uintN, JSInterpMode);
 
     void resetCompartment();
+    void wrapPendingException();
 
     /* 'regs' must only be changed by calling this function. */
     void setCurrentRegs(JSFrameRegs *regs) {
@@ -2128,7 +1876,7 @@ struct JSContext
      * - The newest scripted frame's version, if there is such a frame. 
      * - The default verion.
      *
-     * @note    If this ever shows up in a profile, just add caching!
+     * Note: if this ever shows up in a profile, just add caching!
      */
     JSVersion findVersion() const {
         if (hasVersionOverride)
@@ -2200,14 +1948,6 @@ struct JSContext
     js::Value           iterValue;
 
 #ifdef JS_TRACER
-    /*
-     * State for the current tree execution.  bailExit is valid if the tree has
-     * called back into native code via a _FAIL builtin and has not yet bailed,
-     * else garbage (NULL in debug builds).
-     */
-    js::TracerState     *tracerState;
-    js::VMSideExit      *bailExit;
-
     /*
      * True if traces may be executed. Invariant: The value of traceJitenabled
      * is always equal to the expression in updateJITEnabled below.
@@ -2369,8 +2109,23 @@ struct JSContext
     void assertValidStackDepth(uintN /*depth*/) {}
 #endif
 
-private:
+    bool isExceptionPending() {
+        return throwing;
+    }
 
+    js::Value getPendingException() {
+        JS_ASSERT(throwing);
+        return exception;
+    }
+
+    void setPendingException(js::Value v);
+
+    void clearPendingException() {
+        this->throwing = false;
+        this->exception.setUndefined();
+    }
+
+  private:
     /*
      * The allocation code calls the function to indicate either OOM failure
      * when p is null or that a memory pressure counter has reached some
@@ -2453,7 +2208,7 @@ class AutoGCRooter {
 #ifdef __GNUC__
 # pragma GCC visibility push(default)
 #endif
-    friend void MarkContext(JSTracer *trc, JSContext *acx);
+    friend JS_FRIEND_API(void) MarkContext(JSTracer *trc, JSContext *acx);
     friend void MarkRuntime(JSTracer *trc);
 #ifdef __GNUC__
 # pragma GCC visibility pop
@@ -2488,7 +2243,8 @@ class AutoGCRooter {
         VALVECTOR =   -12, /* js::AutoValueVector */
         DESCRIPTOR =  -13, /* js::AutoPropertyDescriptorRooter */
         STRING =      -14, /* js::AutoStringRooter */
-        IDVECTOR =    -15  /* js::AutoIdVector */
+        IDVECTOR =    -15, /* js::AutoIdVector */
+        BINDINGS =    -16  /* js::Bindings */
     };
 
     private:
@@ -2805,9 +2561,11 @@ class AutoEnumStateRooter : private AutoGCRooter
 #ifdef JS_HAS_XML_SUPPORT
 class AutoXMLRooter : private AutoGCRooter {
   public:
-    AutoXMLRooter(JSContext *cx, JSXML *xml)
+    AutoXMLRooter(JSContext *cx, JSXML *xml
+                  JS_GUARD_OBJECT_NOTIFIER_PARAM)
       : AutoGCRooter(cx, XML), xml(xml)
     {
+        JS_GUARD_OBJECT_NOTIFIER_INIT;
         JS_ASSERT(xml);
     }
 
@@ -2816,73 +2574,132 @@ class AutoXMLRooter : private AutoGCRooter {
 
   private:
     JSXML * const xml;
+    JS_DECL_USE_GUARD_OBJECT_NOTIFIER
 };
 #endif /* JS_HAS_XML_SUPPORT */
 
+class AutoBindingsRooter : private AutoGCRooter {
+  public:
+    AutoBindingsRooter(JSContext *cx, Bindings &bindings
+                       JS_GUARD_OBJECT_NOTIFIER_PARAM)
+      : AutoGCRooter(cx, BINDINGS), bindings(bindings)
+    {
+        JS_GUARD_OBJECT_NOTIFIER_INIT;
+    }
+
+    friend void AutoGCRooter::trace(JSTracer *trc);
+
+  private:
+    Bindings &bindings;
+    JS_DECL_USE_GUARD_OBJECT_NOTIFIER
+};
+
 class AutoLockGC {
-private:
-    JSRuntime *rt;
-public:
-    explicit AutoLockGC(JSRuntime *rt) : rt(rt) { JS_LOCK_GC(rt); }
+  public:
+    explicit AutoLockGC(JSRuntime *rt
+                        JS_GUARD_OBJECT_NOTIFIER_PARAM)
+      : rt(rt)
+    {
+        JS_GUARD_OBJECT_NOTIFIER_INIT;
+        JS_LOCK_GC(rt);
+    }
     ~AutoLockGC() { JS_UNLOCK_GC(rt); }
+
+  private:
+    JSRuntime *rt;
+    JS_DECL_USE_GUARD_OBJECT_NOTIFIER
 };
 
 class AutoUnlockGC {
-private:
+  private:
     JSRuntime *rt;
-public:
-    explicit AutoUnlockGC(JSRuntime *rt) : rt(rt) { JS_UNLOCK_GC(rt); }
+    JS_DECL_USE_GUARD_OBJECT_NOTIFIER
+
+  public:
+    explicit AutoUnlockGC(JSRuntime *rt
+                          JS_GUARD_OBJECT_NOTIFIER_PARAM)
+      : rt(rt)
+    {
+        JS_GUARD_OBJECT_NOTIFIER_INIT;
+        JS_UNLOCK_GC(rt);
+    }
     ~AutoUnlockGC() { JS_LOCK_GC(rt); }
 };
 
-class AutoLockDefaultCompartment {
+class AutoLockAtomsCompartment {
   private:
-      JSContext *cx;
+    JSContext *cx;
+    JS_DECL_USE_GUARD_OBJECT_NOTIFIER
+
   public:
-    AutoLockDefaultCompartment(JSContext *cx) : cx(cx) {
+    AutoLockAtomsCompartment(JSContext *cx
+                               JS_GUARD_OBJECT_NOTIFIER_PARAM)
+      : cx(cx)
+    {
+        JS_GUARD_OBJECT_NOTIFIER_INIT;
         JS_LOCK(cx, &cx->runtime->atomState.lock);
 #ifdef JS_THREADSAFE
-        cx->runtime->defaultCompartmentIsLocked = true;
+        cx->runtime->atomsCompartmentIsLocked = true;
 #endif
     }
-    ~AutoLockDefaultCompartment() {
-        JS_UNLOCK(cx, &cx->runtime->atomState.lock);
+    ~AutoLockAtomsCompartment() {
 #ifdef JS_THREADSAFE
-        cx->runtime->defaultCompartmentIsLocked = false;
+        cx->runtime->atomsCompartmentIsLocked = false;
 #endif
+        JS_UNLOCK(cx, &cx->runtime->atomState.lock);
     }
 };
 
-class AutoUnlockDefaultCompartment {
-  private:
-      JSContext *cx;
+class AutoUnlockAtomsCompartment {
+    JSContext *cx;
+    JS_DECL_USE_GUARD_OBJECT_NOTIFIER
+
   public:
-    AutoUnlockDefaultCompartment(JSContext *cx) : cx(cx) {
-        JS_UNLOCK(cx, &cx->runtime->atomState.lock);
+    AutoUnlockAtomsCompartment(JSContext *cx
+                                 JS_GUARD_OBJECT_NOTIFIER_PARAM)
+      : cx(cx)
+    {
+        JS_GUARD_OBJECT_NOTIFIER_INIT;
 #ifdef JS_THREADSAFE
-        cx->runtime->defaultCompartmentIsLocked = false;
+        cx->runtime->atomsCompartmentIsLocked = false;
 #endif
+        JS_UNLOCK(cx, &cx->runtime->atomState.lock);
     }
-    ~AutoUnlockDefaultCompartment() {
+    ~AutoUnlockAtomsCompartment() {
         JS_LOCK(cx, &cx->runtime->atomState.lock);
 #ifdef JS_THREADSAFE
-        cx->runtime->defaultCompartmentIsLocked = true;
+        cx->runtime->atomsCompartmentIsLocked = true;
 #endif
     }
 };
 
 class AutoKeepAtoms {
     JSRuntime *rt;
+    JS_DECL_USE_GUARD_OBJECT_NOTIFIER
+
   public:
-    explicit AutoKeepAtoms(JSRuntime *rt) : rt(rt) { JS_KEEP_ATOMS(rt); }
+    explicit AutoKeepAtoms(JSRuntime *rt
+                           JS_GUARD_OBJECT_NOTIFIER_PARAM)
+      : rt(rt)
+    {
+        JS_GUARD_OBJECT_NOTIFIER_INIT;
+        JS_KEEP_ATOMS(rt);
+    }
     ~AutoKeepAtoms() { JS_UNKEEP_ATOMS(rt); }
 };
 
 class AutoArenaAllocator {
     JSArenaPool *pool;
     void        *mark;
+    JS_DECL_USE_GUARD_OBJECT_NOTIFIER
+
   public:
-    explicit AutoArenaAllocator(JSArenaPool *pool) : pool(pool) { mark = JS_ARENA_MARK(pool); }
+    explicit AutoArenaAllocator(JSArenaPool *pool
+                                JS_GUARD_OBJECT_NOTIFIER_PARAM)
+      : pool(pool), mark(JS_ARENA_MARK(pool))
+    {
+        JS_GUARD_OBJECT_NOTIFIER_INIT;
+    }
     ~AutoArenaAllocator() { JS_ARENA_RELEASE(pool, mark); }
 
     template <typename T>
@@ -2896,9 +2713,17 @@ class AutoArenaAllocator {
 class AutoReleasePtr {
     JSContext   *cx;
     void        *ptr;
+    JS_DECL_USE_GUARD_OBJECT_NOTIFIER
+
     AutoReleasePtr operator=(const AutoReleasePtr &other);
+
   public:
-    explicit AutoReleasePtr(JSContext *cx, void *ptr) : cx(cx), ptr(ptr) {}
+    explicit AutoReleasePtr(JSContext *cx, void *ptr
+                            JS_GUARD_OBJECT_NOTIFIER_PARAM)
+      : cx(cx), ptr(ptr)
+    {
+        JS_GUARD_OBJECT_NOTIFIER_INIT;
+    }
     ~AutoReleasePtr() { cx->free(ptr); }
 };
 
@@ -2908,9 +2733,17 @@ class AutoReleasePtr {
 class AutoReleaseNullablePtr {
     JSContext   *cx;
     void        *ptr;
+    JS_DECL_USE_GUARD_OBJECT_NOTIFIER
+
     AutoReleaseNullablePtr operator=(const AutoReleaseNullablePtr &other);
+
   public:
-    explicit AutoReleaseNullablePtr(JSContext *cx, void *ptr) : cx(cx), ptr(ptr) {}
+    explicit AutoReleaseNullablePtr(JSContext *cx, void *ptr
+                                    JS_GUARD_OBJECT_NOTIFIER_PARAM)
+      : cx(cx), ptr(ptr)
+    {
+        JS_GUARD_OBJECT_NOTIFIER_INIT;
+    }
     void reset(void *ptr2) {
         if (ptr)
             cx->free(ptr);
@@ -2925,8 +2758,8 @@ class AutoLocalNameArray {
                                 JS_GUARD_OBJECT_NOTIFIER_PARAM)
       : context(cx),
         mark(JS_ARENA_MARK(&cx->tempPool)),
-        names(fun->getLocalNameArray(cx, &cx->tempPool)),
-        count(fun->countLocalNames())
+        names(fun->script()->bindings.getLocalNameArray(cx, &cx->tempPool)),
+        count(fun->script()->bindings.countLocalNames())
     {
         JS_GUARD_OBJECT_NOTIFIER_INIT;
     }
@@ -2948,6 +2781,96 @@ class AutoLocalNameArray {
     uint32      count;
 
     JS_DECL_USE_GUARD_OBJECT_NOTIFIER
+};
+
+template <class RefCountable>
+class AlreadyIncRefed
+{
+    typedef RefCountable *****ConvertibleToBool;
+
+    RefCountable *obj;
+
+  public:
+    explicit AlreadyIncRefed(RefCountable *obj) : obj(obj) {}
+
+    bool null() const { return obj == NULL; }
+    operator ConvertibleToBool() const { return (ConvertibleToBool)obj; }
+
+    RefCountable *operator->() const { JS_ASSERT(!null()); return obj; }
+    RefCountable &operator*() const { JS_ASSERT(!null()); return *obj; }
+    RefCountable *get() const { return obj; }
+};
+
+template <class RefCountable>
+class NeedsIncRef
+{
+    typedef RefCountable *****ConvertibleToBool;
+
+    RefCountable *obj;
+
+  public:
+    explicit NeedsIncRef(RefCountable *obj) : obj(obj) {}
+
+    bool null() const { return obj == NULL; }
+    operator ConvertibleToBool() const { return (ConvertibleToBool)obj; }
+
+    RefCountable *operator->() const { JS_ASSERT(!null()); return obj; }
+    RefCountable &operator*() const { JS_ASSERT(!null()); return *obj; }
+    RefCountable *get() const { return obj; }
+};
+
+template <class RefCountable>
+class AutoRefCount
+{
+    typedef RefCountable *****ConvertibleToBool;
+
+    JSContext *const cx;
+    RefCountable *obj;
+
+    AutoRefCount(const AutoRefCount &);
+    void operator=(const AutoRefCount &);
+
+  public:
+    explicit AutoRefCount(JSContext *cx)
+      : cx(cx), obj(NULL)
+    {}
+
+    AutoRefCount(JSContext *cx, NeedsIncRef<RefCountable> aobj)
+      : cx(cx), obj(aobj.get())
+    {
+        if (obj)
+            obj->incref(cx);
+    }
+
+    AutoRefCount(JSContext *cx, AlreadyIncRefed<RefCountable> aobj)
+      : cx(cx), obj(aobj.get())
+    {}
+
+    ~AutoRefCount() {
+        if (obj)
+            obj->decref(cx);
+    }
+
+    void reset(NeedsIncRef<RefCountable> aobj) {
+        if (obj)
+            obj->decref(cx);
+        obj = aobj.get();
+        if (obj)
+            obj->incref(cx);
+    }
+
+    void reset(AlreadyIncRefed<RefCountable> aobj) {
+        if (obj)
+            obj->decref(cx);
+        obj = aobj.get();
+    }
+
+    bool null() const { return obj == NULL; }
+    operator ConvertibleToBool() const { return (ConvertibleToBool)obj; }
+
+    RefCountable *operator->() const { JS_ASSERT(!null()); return obj; }
+    RefCountable &operator*() const { JS_ASSERT(!null()); return *obj; }
+    RefCountable *get() const { return obj; }
 };
 
 } /* namespace js */
@@ -3238,49 +3161,10 @@ js_CurrentPCIsInImacro(JSContext *cx);
 
 namespace js {
 
-#ifdef JS_TRACER
-/*
- * Reconstruct the JS stack and clear cx->tracecx. We must be currently in a
- * _FAIL builtin from trace on cx or another context on the same thread. The
- * machine code for the trace remains on the C stack when js_DeepBail returns.
- *
- * Implemented in jstracer.cpp.
- */
-JS_FORCES_STACK JS_FRIEND_API(void)
-DeepBail(JSContext *cx);
-#endif
-
-static JS_FORCES_STACK JS_INLINE void
-LeaveTrace(JSContext *cx)
-{
-#ifdef JS_TRACER
-    if (JS_ON_TRACE(cx))
-        DeepBail(cx);
-#endif
-}
-
-static JS_INLINE void
-LeaveTraceIfGlobalObject(JSContext *cx, JSObject *obj)
-{
-    if (!obj->parent)
-        LeaveTrace(cx);
-}
-
-static JS_INLINE JSBool
-CanLeaveTrace(JSContext *cx)
-{
-    JS_ASSERT(JS_ON_TRACE(cx));
-#ifdef JS_TRACER
-    return cx->bailExit != NULL;
-#else
-    return JS_FALSE;
-#endif
-}
-
-extern void
-SetPendingException(JSContext *cx, const Value &v);
-
 class RegExpStatics;
+
+extern JS_FORCES_STACK JS_FRIEND_API(void)
+LeaveTrace(JSContext *cx);
 
 } /* namespace js */
 

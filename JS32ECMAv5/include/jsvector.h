@@ -260,10 +260,16 @@ class Vector : AllocPolicy
     }
 
   public:
+    typedef T ElementType;
+
     Vector(AllocPolicy = AllocPolicy());
     ~Vector();
 
     /* accessors */
+
+    const AllocPolicy &allocPolicy() const {
+        return *this;
+    }
 
     enum { InlineLength = N };
 
@@ -342,6 +348,8 @@ class Vector : AllocPolicy
 
     void popBack();
 
+    T popCopy();
+
     /*
      * Transfers ownership of the internal buffer used by Vector to the caller.
      * After this call, the Vector is empty. Since the returned buffer may need
@@ -371,20 +379,6 @@ class Vector : AllocPolicy
      */
     void erase(T *t);
 };
-
-/* Helper functions */
-
-/*
- * This helper function is specialized for appending the characters of a string
- * literal to a vector. This could not be done generically since one must take
- * care not to append the terminating '\0'.
- */
-template <class T, size_t N, class AP, size_t ArrayLength>
-JS_ALWAYS_INLINE bool
-js_AppendLiteral(Vector<T,N,AP> &v, const char (&array)[ArrayLength])
-{
-    return v.append(array, array + ArrayLength - 1);
-}
 
 /* This does the re-entrancy check plus several other sanity checks. */
 #define REENTRANCY_GUARD_ET_AL \
@@ -688,6 +682,15 @@ Vector<T,N,AP>::popBack()
     JS_ASSERT(!empty());
     --mLength;
     endNoCheck()->~T();
+}
+
+template <class T, size_t N, class AP>
+JS_ALWAYS_INLINE T
+Vector<T,N,AP>::popCopy()
+{
+    T ret = back();
+    popBack();
+    return ret;
 }
 
 template <class T, size_t N, class AP>

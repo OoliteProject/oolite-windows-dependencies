@@ -138,6 +138,9 @@ JS_BEGIN_EXTERN_C
  *                                     pn_right: initializer
  * TOK_RETURN   unary       pn_kid: return expr or null
  * TOK_SEMI     unary       pn_kid: expr or null statement
+ *                          pn_prologue: true if Directive Prologue member
+ *                              in original source, not introduced via
+ *                              constant folding or other tree rewriting
  * TOK_COLON    name        pn_atom: label, pn_expr: labeled statement
  *
  * <Expressions>
@@ -376,7 +379,9 @@ struct JSParseNode {
         struct {                        /* one kid if unary */
             JSParseNode *kid;
             jsint       num;            /* -1 or sharp variable number */
-            JSBool      hidden;         /* hidden genexp-induced JSOP_YIELD */
+            JSBool      hidden;         /* hidden genexp-induced JSOP_YIELD
+                                           or directive prologue member (as
+                                           pn_prologue) */
         } unary;
         struct {                        /* name, labeled statement, etc. */
             union {
@@ -427,6 +432,7 @@ struct JSParseNode {
 #define pn_kid          pn_u.unary.kid
 #define pn_num          pn_u.unary.num
 #define pn_hidden       pn_u.unary.hidden
+#define pn_prologue     pn_u.unary.hidden
 #define pn_atom         pn_u.name.atom
 #define pn_objbox       pn_u.name.objbox
 #define pn_expr         pn_u.name.expr
@@ -479,7 +485,7 @@ public:
 #define PND_CONST       0x02            /* const binding (orthogonal to let) */
 #define PND_INITIALIZED 0x04            /* initialized declaration */
 #define PND_ASSIGNED    0x08            /* set if ever LHS of assignment */
-#define PND_TOPLEVEL    0x10            /* function at top of body or prog */
+#define PND_TOPLEVEL    0x10            /* see isTopLevel() below */
 #define PND_BLOCKCHILD  0x20            /* use or def is direct block child */
 #define PND_GVAR        0x40            /* gvar binding, can't close over
                                            because it could be deleted */
@@ -513,6 +519,7 @@ public:
                                               arguments occurs before function
                                               body */
 #define PNX_HOLEY      0x400            /* array initialiser has holes */
+#define PNX_NONCONST   0x800            /* initialiser has non-constants */
 
     uintN frameLevel() const {
         JS_ASSERT(pn_arity == PN_FUNC || pn_arity == PN_NAME);
@@ -529,13 +536,26 @@ public:
     bool isLet() const          { return test(PND_LET); }
     bool isConst() const        { return test(PND_CONST); }
     bool isInitialized() const  { return test(PND_INITIALIZED); }
-    bool isTopLevel() const     { return test(PND_TOPLEVEL); }
     bool isBlockChild() const   { return test(PND_BLOCKCHILD); }
     bool isPlaceholder() const  { return test(PND_PLACEHOLDER); }
     bool isDeoptimized() const  { return test(PND_DEOPTIMIZED); }
     bool isAssigned() const     { return test(PND_ASSIGNED); }
     bool isFunArg() const       { return test(PND_FUNARG); }
     bool isClosed() const       { return test(PND_CLOSED); }
+
+    /*
+     * True iff this definition creates a top-level binding in the overall
+     * script being compiled -- that is, it affects the whole program's
+     * bindings, not bindings for a specific function (unless this definition
+     * is in the outermost scope in eval code, executed within a function) or
+     * the properties of a specific object (through the with statement).
+     *
+     * NB: Function sub-statements found in overall program code and not nested
+     *     within other functions are not currently top level, even though (if
+     *     executed) they do create top-level bindings; there is no particular
+     *     rationale for this behavior.
+     */
+    bool isTopLevel() const     { return test(PND_TOPLEVEL); }
 
     /* Defined below, see after struct JSDefinition. */
     void setFunArg();
@@ -551,13 +571,21 @@ public:
     }
 
     /*
-     * True if this statement node could be a member of a Directive
-     * Prologue.  Note that the prologue may contain strings that
-     * cannot themselves be directives; that's a stricter test.
-     * If Statement begins to simplify trees into this form, then
-     * we'll need additional flags that we can test here.
+     * True if this statement node could be a member of a Directive Prologue: an
+     * expression statement consisting of a single string literal.
+     *
+     * This considers only the node and its children, not its context. After
+     * parsing, check the node's pn_prologue flag to see if it is indeed part of
+     * a directive prologue.
+     *
+     * Note that a Directive Prologue can contain statements that cannot
+     * themselves be directives (string literals that include escape sequences
+     * or escaped newlines, say). This member function returns true for such
+     * nodes; we use it to determine the extent of the prologue.
+     * isEscapeFreeStringLiteral, below, checks whether the node itself could be
+     * a directive.
      */
-    bool isDirectivePrologueMember() const {
+    bool isStringExprStatement() const {
         if (PN_TYPE(this) == js::TOK_SEMI) {
             JS_ASSERT(pn_arity == PN_UNARY);
             JSParseNode *kid = pn_kid;
@@ -567,22 +595,25 @@ public:
     }
 
     /*
-     * True if this node, known to be a Directive Prologue member,
-     * could be a directive itself.
+     * Return true if this node, known to be a string literal, could be the
+     * string of a directive in a Directive Prologue. Directive strings never
+     * contain escape sequences or line continuations.
      */
-    bool isDirective() const {
-        JS_ASSERT(isDirectivePrologueMember());
-        JSParseNode *kid = pn_kid;
-        JSString *str = ATOM_TO_STRING(kid->pn_atom);
+    bool isEscapeFreeStringLiteral() const {
+        JS_ASSERT(pn_type == js::TOK_STRING && !pn_parens);
+        JSString *str = ATOM_TO_STRING(pn_atom);
 
         /*
-         * Directives must contain no EscapeSequences or LineContinuations.
          * If the string's length in the source code is its length as a value,
-         * accounting for the quotes, then it qualifies.
+         * accounting for the quotes, then it must not contain any escape
+         * sequences or line continuations.
          */
         return (pn_pos.begin.lineno == pn_pos.end.lineno &&
                 pn_pos.begin.index + str->length() + 2 == pn_pos.end.index);
     }
+
+    /* Return true if this node appears in a Directive Prologue. */
+    bool isDirectivePrologueMember() const { return pn_prologue; }
 
 #ifdef JS_HAS_GENERATOR_EXPRS
     /*
@@ -647,6 +678,9 @@ public:
         pn_tail = &pn->pn_next;
         pn_count++;
     }
+
+    bool getConstantValue(JSContext *cx, bool strictChecks, js::Value *vp);
+    inline bool isConstant();
 };
 
 namespace js {
@@ -815,12 +849,8 @@ struct LexicalScopeNode : public JSParseNode {
  * and because all uses are contained in the same block as the definition.
  *
  * We also analyze function uses to flag upward/downward funargs, optimizing
- * Algol-like (not passed as funargs, only ever called) lightweight functions
- * using cx->display. See JSOP_{GET,CALL}UPVAR.
- *
- * This means that closure optimizations may be frustrated by with, eval, or
- * assignment to an outer var. Such hard cases require heavyweight functions
- * and JSOP_NAME, etc.
+ * those lambdas that post-dominate their upvars inevitable only assignments or
+ * initializations as flat closures (after Chez Scheme's display closures).
  */
 #define dn_uses         pn_link
 
@@ -849,6 +879,11 @@ struct JSDefinition : public JSParseNode
     bool isFreeVar() const {
         JS_ASSERT(pn_defn);
         return pn_cookie.isFree() || test(PND_GVAR);
+    }
+
+    bool isGlobal() const {
+        JS_ASSERT(pn_defn);
+        return test(PND_GVAR);
     }
 
     // Grr, windows.h or something under it #defines CONST...
@@ -915,8 +950,9 @@ struct JSObjectBox {
     JSObjectBox         *traceLink;
     JSObjectBox         *emitLink;
     JSObject            *object;
-    uintN               index;
     JSObjectBox         *parent;
+    uintN               index;
+    bool                isFunctionBox;
 };
 
 #define JSFB_LEVEL_BITS 14
@@ -932,6 +968,7 @@ struct JSFunctionBox : public JSObjectBox
                                                    pn_link, since lambdas are
                                                    neither definitions nor uses
                                                    of a binding */
+    js::Bindings        bindings;               /* bindings for this function */
     uint32              queued:1,
                         inLoop:1,               /* in a loop in parent function */
                         level:JSFB_LEVEL_BITS;
@@ -965,11 +1002,11 @@ struct JSFunctionBoxQueue {
 
     bool init(uint32 count) {
         lengthMask = JS_BITMASK(JS_CeilingLog2(count));
-        vector = new JSFunctionBox*[length()];
+        vector = js_array_new<JSFunctionBox*>(length());
         return !!vector;
     }
 
-    ~JSFunctionBoxQueue() { delete[] vector; }
+    ~JSFunctionBoxQueue() { js_array_delete(vector); }
 
     void push(JSFunctionBox *funbox) {
         if (!funbox->queued) {
@@ -1064,9 +1101,10 @@ struct Parser : private js::AutoGCRooter
      * starting at funbox, recursively walking its kids, then following its
      * siblings, their kids, etc.
      */
-    bool analyzeFunctions(JSFunctionBox *funbox, uint32& tcflags);
-    bool markFunArgs(JSFunctionBox *funbox, uintN tcflags);
-    void setFunctionKinds(JSFunctionBox *funbox, uint32& tcflags);
+    bool analyzeFunctions(JSTreeContext *tc);
+    void cleanFunctionList(JSFunctionBox **funbox);
+    bool markFunArgs(JSFunctionBox *funbox);
+    void setFunctionKinds(JSFunctionBox *funbox, uint32 *tcflags);
 
     void trace(JSTracer *trc);
 
@@ -1113,23 +1151,22 @@ private:
     JSParseNode *unaryExpr();
     JSParseNode *memberExpr(JSBool allowCallSyntax);
     JSParseNode *primaryExpr(js::TokenKind tt, JSBool afterDot);
-    JSParseNode *parenExpr(JSParseNode *pn1, JSBool *genexp);
+    JSParseNode *parenExpr(JSBool *genexp = NULL);
 
     /*
      * Additional JS parsers.
      */
-    bool recognizeDirectivePrologue(JSParseNode *pn);
+    bool recognizeDirectivePrologue(JSParseNode *pn, bool *isDirectivePrologueMember);
 
     enum FunctionType { GETTER, SETTER, GENERAL };
-    bool functionArguments(JSTreeContext &funtc, JSFunctionBox *funbox, JSFunction *fun,
-                           JSParseNode **list);
+    bool functionArguments(JSTreeContext &funtc, JSFunctionBox *funbox, JSParseNode **list);
     JSParseNode *functionBody();
     JSParseNode *functionDef(JSAtom *name, FunctionType type, uintN lambda);
 
     JSParseNode *condition();
     JSParseNode *comprehensionTail(JSParseNode *kid, uintN blockid,
                                    js::TokenKind type = js::TOK_SEMI, JSOp op = JSOP_NOP);
-    JSParseNode *generatorExpr(JSParseNode *pn, JSParseNode *kid);
+    JSParseNode *generatorExpr(JSParseNode *kid);
     JSBool argumentList(JSParseNode *listNode);
     JSParseNode *bracketedExpr();
     JSParseNode *letBlock(JSBool statement);
@@ -1182,7 +1219,7 @@ struct Compiler
 
     static bool
     compileFunctionBody(JSContext *cx, JSFunction *fun, JSPrincipals *principals,
-                        const jschar *chars, size_t length,
+                        js::Bindings *bindings, const jschar *chars, size_t length,
                         const char *filename, uintN lineno);
 
     static JSScript *

@@ -47,6 +47,7 @@
 
 /* Define to 1 if SpiderMonkey should support multi-threaded clients.  */
 #undef JS_THREADSAFE
+//#define JS_THREADSAFE	1
 
 /* Define to 1 if SpiderMonkey should support the ability to perform
    entirely too much GC.  */

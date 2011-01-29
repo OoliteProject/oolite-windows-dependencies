@@ -300,6 +300,7 @@ struct JSObject : js::gc::Cell {
      */
     friend class js::TraceRecorder;
     friend class nanojit::ValidateWriter;
+    friend class GetPropCompiler;
 
     /*
      * Private pointer to the last added property and methods to manipulate the
@@ -337,16 +338,19 @@ struct JSObject : js::gc::Cell {
     inline bool nativeContains(const js::Shape &shape);
 
     enum {
-        DELEGATE        = 0x01,
-        SYSTEM          = 0x02,
-        NOT_EXTENSIBLE  = 0x04,
-        BRANDED         = 0x08,
-        GENERIC         = 0x10,
-        METHOD_BARRIER  = 0x20,
-        INDEXED         = 0x40,
-        OWN_SHAPE       = 0x80,
-        BOUND_FUNCTION  = 0x100,
-        HAS_EQUALITY    = 0x200
+        DELEGATE                  =  0x01,
+        SYSTEM                    =  0x02,
+        NOT_EXTENSIBLE            =  0x04,
+        BRANDED                   =  0x08,
+        GENERIC                   =  0x10,
+        METHOD_BARRIER            =  0x20,
+        INDEXED                   =  0x40,
+        OWN_SHAPE                 =  0x80,
+        BOUND_FUNCTION            = 0x100,
+        HAS_EQUALITY              = 0x200,
+        METHOD_THRASH_COUNT_MASK  = 0xc00,
+        METHOD_THRASH_COUNT_SHIFT =    10,
+        METHOD_THRASH_COUNT_MAX   = METHOD_THRASH_COUNT_MASK >> METHOD_THRASH_COUNT_SHIFT
     };
 
     /*
@@ -423,11 +427,25 @@ struct JSObject : js::gc::Cell {
      */
     bool branded()              { return !!(flags & BRANDED); }
 
+    /*
+     * NB: these return false on shape overflow but do not report any error.
+     * Callers who depend on shape guarantees should therefore bail off trace,
+     * e.g., on false returns.
+     */
     bool brand(JSContext *cx);
     bool unbrand(JSContext *cx);
 
     bool generic()              { return !!(flags & GENERIC); }
     void setGeneric()           { flags |= GENERIC; }
+
+    uintN getMethodThrashCount() const {
+        return (flags & METHOD_THRASH_COUNT_MASK) >> METHOD_THRASH_COUNT_SHIFT;
+    }
+
+    void setMethodThrashCount(uintN count) {
+        JS_ASSERT(count <= METHOD_THRASH_COUNT_MAX);
+        flags = (flags & ~METHOD_THRASH_COUNT_MASK) | (count << METHOD_THRASH_COUNT_SHIFT);
+    }
 
     bool hasSpecialEquality() const { return !!(flags & HAS_EQUALITY); }
     void assertSpecialEqualitySynced() const {
@@ -448,18 +466,18 @@ struct JSObject : js::gc::Cell {
 
     bool hasOwnShape() const    { return !!(flags & OWN_SHAPE); }
 
-    void setMap(JSObjectMap *amap) {
+    void setMap(const JSObjectMap *amap) {
         JS_ASSERT(!hasOwnShape());
-        map = amap;
+        map = const_cast<JSObjectMap *>(amap);
         objShape = map->shape;
     }
 
     void setSharedNonNativeMap() {
-        setMap(const_cast<JSObjectMap *>(&JSObjectMap::sharedNonNative));
+        setMap(&JSObjectMap::sharedNonNative);
     }
 
     void deletingShapeChange(JSContext *cx, const js::Shape &shape);
-    bool methodShapeChange(JSContext *cx, const js::Shape &shape);
+    const js::Shape *methodShapeChange(JSContext *cx, const js::Shape &shape);
     bool methodShapeChange(JSContext *cx, uint32 slot);
     void protoShapeChange(JSContext *cx);
     void shadowingShapeChange(JSContext *cx, const js::Shape &shape);
@@ -533,9 +551,9 @@ struct JSObject : js::gc::Cell {
      * jsobjinlines.h after methodReadBarrier. The slot flavor is required by
      * JSOP_*GVAR, which deals in slots not shapes, while not deoptimizing to
      * map slot to shape unless JSObject::flags show that this is necessary.
-     * The methodShapeChange overload (directly below) parallels this.
+     * The methodShapeChange overload (above) parallels this.
      */
-    bool methodWriteBarrier(JSContext *cx, const js::Shape &shape, const js::Value &v);
+    const js::Shape *methodWriteBarrier(JSContext *cx, const js::Shape &shape, const js::Value &v);
     bool methodWriteBarrier(JSContext *cx, uint32 slot, const js::Value &v);
 
     bool isIndexed() const          { return !!(flags & INDEXED); }
@@ -778,25 +796,50 @@ struct JSObject : js::gc::Cell {
 
   private:
     /*
-     * Reserved slot structure for Arguments objects:
+     * We represent arguments objects using js_ArgumentsClass and
+     * js::StrictArgumentsClass. The two are structured similarly, and methods
+     * valid on arguments objects of one class are also generally valid on
+     * arguments objects of the other.
      *
-     * private              - the function's stack frame until the function
-     *                        returns; also, JS_ARGUMENTS_OBJECT_ON_TRACE if
-     *                        arguments was created on trace
+     * Arguments objects of either class store arguments length in a slot:
+     *
      * JSSLOT_ARGS_LENGTH   - the number of actual arguments and a flag
      *                        indicating whether arguments.length was
      *                        overwritten. This slot is not used to represent
      *                        arguments.length after that property has been
      *                        assigned, even if the new value is integral: it's
      *                        always the original length.
-     * JSSLOT_ARGS_DATA     - pointer to an ArgumentsData structure containing
-     *                        the arguments.callee value or JSVAL_HOLE if that
-     *                        was overwritten, and the values of all arguments
-     *                        once the function has returned (or as soon as a
-     *                        strict arguments object has been created).
      *
-     * Argument index i is stored in ArgumentsData.slots[i], accessible via
-     * {get,set}ArgsElement().
+     * Both arguments classes use a slot for storing arguments data:
+     *
+     * JSSLOT_ARGS_DATA     - pointer to an ArgumentsData structure
+     *
+     * ArgumentsData for normal arguments stores the value of arguments.callee,
+     * as long as that property has not been overwritten. If arguments.callee
+     * is overwritten, the corresponding value in ArgumentsData is set to
+     * MagicValue(JS_ARGS_HOLE). Strict arguments do not store this value
+     * because arguments.callee is a poison pill for strict mode arguments.
+     *
+     * The ArgumentsData structure also stores argument values. For normal
+     * arguments this occurs after the corresponding function has returned, and
+     * for strict arguments this occurs when the arguments object is created,
+     * or sometimes shortly after (but not observably so). arguments[i] is
+     * stored in ArgumentsData.slots[i], accessible via getArgsElement() and
+     * setArgsElement(). Deletion of arguments[i] overwrites that slot with
+     * MagicValue(JS_ARGS_HOLE); subsequent redefinition of arguments[i] will
+     * use a normal property to store the value, ignoring the slot.
+     *
+     * Non-strict arguments have a private:
+     *
+     * private              - the function's stack frame until the function
+     *                        returns, when it is replaced with null; also,
+     *                        JS_ARGUMENTS_OBJECT_ON_TRACE while on trace, if
+     *                        arguments was created on trace
+     *
+     * Technically strict arguments have a private, but it's always null.
+     * Conceptually it would be better to remove this oddity, but preserving it
+     * allows us to work with arguments objects of either kind more abstractly,
+     * so we keep it for now.
      */
     static const uint32 JSSLOT_ARGS_DATA = 1;
 
@@ -837,7 +880,15 @@ struct JSObject : js::gc::Cell {
 
   private:
     /*
-     * Reserved slot structure for Arguments objects:
+     * Reserved slot structure for Call objects:
+     *
+     * private               - the stack frame corresponding to the Call object
+     *                         until js_PutCallObject or its on-trace analog
+     *                         is called, null thereafter
+     * JSSLOT_CALL_CALLEE    - callee function for the stack frame, or null if
+     *                         the stack frame is for strict mode eval code
+     * JSSLOT_CALL_ARGUMENTS - arguments object for non-strict mode eval stack
+     *                         frames (not valid for strict mode eval frames)
      */
     static const uint32 JSSLOT_CALL_CALLEE = 0;
     static const uint32 JSSLOT_CALL_ARGUMENTS = 1;
@@ -846,12 +897,30 @@ struct JSObject : js::gc::Cell {
     /* Number of reserved slots. */
     static const uint32 CALL_RESERVED_SLOTS = 2;
 
-    inline JSObject &getCallObjCallee() const;
+    /* True if this is for a strict mode eval frame or for a function call. */
+    inline bool callIsForEval() const;
+
+    /* The stack frame for this Call object, if the frame is still active. */
+    inline JSStackFrame *maybeCallObjStackFrame() const;
+
+    /*
+     * The callee function if this Call object was created for a function
+     * invocation, or null if it was created for a strict mode eval frame.
+     */
+    inline JSObject *getCallObjCallee() const;
     inline JSFunction *getCallObjCalleeFunction() const; 
-    inline void setCallObjCallee(JSObject &callee);
+    inline void setCallObjCallee(JSObject *callee);
 
     inline const js::Value &getCallObjArguments() const;
     inline void setCallObjArguments(const js::Value &v);
+
+    /* Returns the formal argument at the given index. */
+    inline const js::Value &callObjArg(uintN i) const;
+    inline js::Value &callObjArg(uintN i);
+
+    /* Returns the variable at the given index. */
+    inline const js::Value &callObjVar(uintN i) const;
+    inline js::Value &callObjVar(uintN i);
 
     /*
      * Date-specific getters and setters.
@@ -912,6 +981,7 @@ struct JSObject : js::gc::Cell {
 
     inline js::Value *getFlatClosureUpvars() const;
     inline js::Value getFlatClosureUpvar(uint32 i) const;
+    inline js::Value &getFlatClosureUpvar(uint32 i);
     inline void setFlatClosureUpvars(js::Value *upvars);
 
     inline bool hasMethodObj(const JSObject& obj) const;
@@ -969,17 +1039,21 @@ struct JSObject : js::gc::Cell {
     static const uint32 NAMESPACE_CLASS_RESERVED_SLOTS = 3;
     static const uint32 QNAME_CLASS_RESERVED_SLOTS     = 3;
 
-    inline jsval getNamePrefix() const;
-    inline void setNamePrefix(jsval prefix);
+    inline JSLinearString *getNamePrefix() const;
+    inline jsval getNamePrefixVal() const;
+    inline void setNamePrefix(JSLinearString *prefix);
+    inline void clearNamePrefix();
 
-    inline jsval getNameURI() const;
-    inline void setNameURI(jsval uri);
+    inline JSLinearString *getNameURI() const;
+    inline jsval getNameURIVal() const;
+    inline void setNameURI(JSLinearString *uri);
 
     inline jsval getNamespaceDeclared() const;
     inline void setNamespaceDeclared(jsval decl);
 
-    inline jsval getQNameLocalName() const;
-    inline void setQNameLocalName(jsval decl);
+    inline JSLinearString *getQNameLocalName() const;
+    inline jsval getQNameLocalNameVal() const;
+    inline void setQNameLocalName(JSLinearString *name);
 
     /*
      * Proxy-specific getters and setters.
@@ -1042,6 +1116,7 @@ struct JSObject : js::gc::Cell {
     bool allocSlot(JSContext *cx, uint32 *slotp);
     bool freeSlot(JSContext *cx, uint32 slot);
 
+  public:
     bool reportReadOnly(JSContext* cx, jsid id, uintN report = JSREPORT_ERROR);
     bool reportNotConfigurable(JSContext* cx, jsid id, uintN report = JSREPORT_ERROR);
     bool reportNotExtensible(JSContext *cx, uintN report = JSREPORT_ERROR);

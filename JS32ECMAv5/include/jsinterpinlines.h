@@ -49,6 +49,8 @@
 #include "jsstr.h"
 #include "methodjit/MethodJIT.h"
 
+#include "jsfuninlines.h"
+
 inline void
 JSStackFrame::initPrev(JSContext *cx)
 {
@@ -186,9 +188,7 @@ JSStackFrame::initEvalFrame(JSContext *cx, JSScript *script, JSStackFrame *prev,
 
     /* Initialize stack frame members. */
     flags_ = flagsArg | JSFRAME_HAS_PREVPC | JSFRAME_HAS_SCOPECHAIN |
-             (prev->flags_ & (JSFRAME_FUNCTION |
-                              JSFRAME_GLOBAL |
-                              JSFRAME_HAS_CALL_OBJ));
+             (prev->flags_ & (JSFRAME_FUNCTION | JSFRAME_GLOBAL | JSFRAME_HAS_CALL_OBJ));
     if (isFunctionFrame()) {
         exec = prev->exec;
         args.script = script;
@@ -266,7 +266,12 @@ JSStackFrame::stealFrameAndSlots(js::Value *vp, JSStackFrame *otherfp,
         }
     }
     if (hasArgsObj()) {
-        argsObj().setPrivate(this);
+        JSObject &args = argsObj();
+        JS_ASSERT(args.isArguments());
+        if (args.isNormalArguments())
+            args.setPrivate(this);
+        else
+            JS_ASSERT(!args.getPrivate());
         otherfp->flags_ &= ~JSFRAME_HAS_ARGS_OBJ;
     }
 }
@@ -356,7 +361,7 @@ JSStackFrame::computeThis(JSContext *cx)
     if (thisv.isObject())
         return true;
     if (isFunctionFrame()) {
-        if (fun()->acceptsPrimitiveThis())
+        if (fun()->inStrictMode())
             return true;
         /*
          * Eval function frames have their own |this| slot, which is a copy of the function's
@@ -538,7 +543,6 @@ class InvokeSessionGuard
     Value *formals_, *actuals_;
     unsigned nformals_;
     JSScript *script_;
-    void *code_;
     Value *stackLimit_;
     jsbytecode *stop_;
 
@@ -581,7 +585,12 @@ InvokeSessionGuard::invoke(JSContext *cx) const
     formals_[-2] = savedCallee_;
     formals_[-1] = savedThis_;
 
+    void *code;
+#ifdef JS_METHODJIT
+    if (!optimized() || !(code = script_->getJIT(false /* !constructing */)->invokeEntry))
+#else
     if (!optimized())
+#endif
         return Invoke(cx, args_, 0);
 
     /* Clear any garbage left from the last Invoke. */
@@ -595,11 +604,8 @@ InvokeSessionGuard::invoke(JSContext *cx) const
         AutoPreserveEnumerators preserve(cx);
         Probes::enterJSFun(cx, fp->fun(), script_);
 #ifdef JS_METHODJIT
-        if (code_ != script_->getJIT(fp->isConstructing())->invokeEntry)
-            *(volatile int *)0x101 = 0;
-
         AutoInterpPreparer prepareInterp(cx, script_);
-        ok = mjit::EnterMethodJIT(cx, fp, code_, stackLimit_);
+        ok = mjit::EnterMethodJIT(cx, fp, code, stackLimit_);
         cx->regs->pc = stop_;
 #else
         cx->regs->pc = script_->code;
@@ -713,19 +719,38 @@ ScriptEpilogue(JSContext *cx, JSStackFrame *fp, JSBool ok)
     if (!fp->isExecuteFrame())
         Probes::exitJSFun(cx, fp->maybeFun(), fp->maybeScript());
 
-    JSInterpreterHook hook = cx->debugHooks->callHook;
-    void* hookData;
+    JSInterpreterHook hook =
+        fp->isExecuteFrame() ? cx->debugHooks->executeHook : cx->debugHooks->callHook;
 
-    if (hook && (hookData = fp->maybeHookData()) && !fp->isExecuteFrame())
+    void* hookData;
+    if (JS_UNLIKELY(hook != NULL) && (hookData = fp->maybeHookData()))
         hook(cx, fp, JS_FALSE, &ok, hookData);
 
-    /*
-     * An eval frame's parent owns its activation objects. A yielding frame's
-     * activation objects are transferred to the floating frame, stored in the
-     * generator.
-     */
-    if (fp->isFunctionFrame() && !fp->isEvalFrame() && !fp->isYielding())
-        PutActivationObjects(cx, fp);
+    if (fp->isEvalFrame()) {
+        /*
+         * The parent (ancestor for nested eval) of a non-strict eval frame
+         * owns its activation objects. Strict mode eval frames own their own
+         * Call objects but never have an arguments object (the first non-eval
+         * parent frame has it).
+         */
+        if (fp->script()->strictModeCode) {
+            JS_ASSERT(!fp->isYielding());
+            JS_ASSERT(!fp->hasArgsObj());
+            JS_ASSERT(fp->hasCallObj());
+            JS_ASSERT(fp->callObj().callIsForEval());
+            js_PutCallObject(cx, fp);
+        }
+    } else {
+        /*
+         * Otherwise only function frames have activation objects. A yielding
+         * frame's activation objects are transferred to the floating frame,
+         * stored in the generator, and thus need not be synced.
+         */
+        if (fp->isFunctionFrame() && !fp->isYielding()) {
+            JS_ASSERT_IF(fp->hasCallObj(), !fp->callObj().callIsForEval());
+            PutActivationObjects(cx, fp);
+        }
+    }
 
     /*
      * If inline-constructing, replace primitive rval with the new object

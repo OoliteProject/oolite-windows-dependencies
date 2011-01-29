@@ -263,6 +263,7 @@ enum TokenStreamFlags
     TSF_XMLTAGMODE = 0x200,     /* scanning within an XML tag in E4X */
     TSF_XMLTEXTMODE = 0x400,    /* scanning XMLText terminal from E4X */
     TSF_XMLONLYMODE = 0x800,    /* don't scan {expr} within text/tag */
+    TSF_OCTAL_CHAR = 0x1000,    /* observed a octal character escape */
 
     /*
      * To handle the hard case of contiguous HTML comments, we want to clear the
@@ -299,6 +300,8 @@ class TokenStream
     static const uintN ntokensMask = ntokens - 1;
 
   public:
+    typedef Vector<jschar, 32> CharBuffer;
+
     /*
      * To construct a TokenStream, first call the constructor, which is
      * infallible, then call |init|, which can fail. To destroy a TokenStream,
@@ -324,7 +327,7 @@ class TokenStream
     JSContext *getContext() const { return cx; }
     bool onCurrentLine(const TokenPos &pos) const { return lineno == pos.end.lineno; }
     const Token &currentToken() const { return tokens[cursor]; }
-    const JSCharBuffer &getTokenbuf() const { return tokenbuf; }
+    const CharBuffer &getTokenbuf() const { return tokenbuf; }
     const char *getFilename() const { return filename; }
     uintN getLineno() const { return lineno; }
 
@@ -333,12 +336,15 @@ class TokenStream
     void setXMLTagMode(bool enabled = true) { setFlag(enabled, TSF_XMLTAGMODE); }
     void setXMLOnlyMode(bool enabled = true) { setFlag(enabled, TSF_XMLONLYMODE); }
     void setUnexpectedEOF(bool enabled = true) { setFlag(enabled, TSF_UNEXPECTED_EOF); }
+    void setOctalCharacterEscape(bool enabled = true) { setFlag(enabled, TSF_OCTAL_CHAR); }
+
     bool isStrictMode() { return !!(flags & TSF_STRICT_MODE_CODE); }
     bool isXMLTagMode() { return !!(flags & TSF_XMLTAGMODE); }
     bool isXMLOnlyMode() { return !!(flags & TSF_XMLONLYMODE); }
     bool isUnexpectedEOF() { return !!(flags & TSF_UNEXPECTED_EOF); }
     bool isEOF() const { return !!(flags & TSF_EOF); }
     bool isError() const { return !!(flags & TSF_ERROR); }
+    bool hasOctalCharacterEscape() const { return flags & TSF_OCTAL_CHAR; }
 
     /* Mutators. */
     bool reportCompileErrorNumberVA(JSParseNode *pn, uintN flags, uintN errorNumber, va_list ap);
@@ -350,6 +356,8 @@ class TokenStream
     }
 
   private:
+    static JSAtom *atomize(JSContext *cx, CharBuffer &cb);
+
     /*
      * Enables flags in the associated tokenstream for the object lifetime.
      * Useful for lexically-scoped flag toggles.
@@ -458,7 +466,9 @@ class TokenStream
     void ungetChar(int32 c);
     void ungetCharIgnoreEOL(int32 c);
     Token *newToken(ptrdiff_t adjust);
-    int32 getUnicodeEscape();
+    bool peekUnicodeEscape(int32 *c);
+    bool matchUnicodeEscapeIdStart(int32 *c);
+    bool matchUnicodeEscapeIdent(int32 *c);
     JSBool peekChars(intN n, jschar *cp);
     JSBool getXMLEntity();
     jschar *findEOL();
@@ -495,7 +505,7 @@ class TokenStream
     JSSourceHandler     listener;       /* callback for source; eg debugger */
     void                *listenerData;  /* listener 'this' data */
     void                *listenerTSData;/* listener data for this TokenStream */
-    JSCharBuffer        tokenbuf;       /* current token string buffer */
+    CharBuffer          tokenbuf;       /* current token string buffer */
     bool                maybeEOL[256];  /* probabilistic EOL lookup table */
     bool                maybeStrSpecial[256];/* speeds up string scanning */
     JSVersion           version;        /* cached version number for scan */
@@ -531,7 +541,7 @@ typedef void (*JSMapKeywordFun)(const char *);
  * check if str is a JS keyword.
  */
 extern JSBool
-js_IsIdentifier(JSString *str);
+js_IsIdentifier(JSLinearString *str);
 
 /*
  * Steal one JSREPORT_* bit (see jsapi.h) to tell that arguments to the error
