@@ -47,7 +47,7 @@
 
 /* Gross special case for Gecko, which defines malloc/calloc/free. */
 #ifdef mozilla_mozalloc_macro_wrappers_h
-#  define JS_UNDEFD_MOZALLOC_WRAPPERS
+#  define JS_CNTXT_UNDEFD_MOZALLOC_WRAPPERS
 /* The "anti-header" */
 #  include "mozilla/mozalloc_undef_macro_wrappers.h"
 #endif
@@ -833,7 +833,7 @@ private:
                         _(joinedsetmethod), _(joinedinitmethod),              \
                         _(joinedreplace), _(joinedsort), _(joinedmodulepat),  \
                         _(mreadbarrier), _(mwritebarrier), _(mwslotbarrier),  \
-                        _(unjoined)
+                        _(unjoined), _(indynamicscope)
 # define identity(x)    x
 
 struct JSFunctionMeter {
@@ -891,20 +891,6 @@ struct JSThreadData {
 
     /* State used by dtoa.c. */
     DtoaState           *dtoaState;
-
-    /*
-     * A single-entry cache for some base-10 double-to-string conversions.
-     * This helps date-format-xparb.js.  It also avoids skewing the results
-     * for v8-splay.js when measured by the SunSpider harness, where the splay
-     * tree initialization (which includes many repeated double-to-string
-     * conversions) is erroneously included in the measurement; see bug
-     * 562553.
-     */
-    struct {
-        jsdouble d;
-        jsint    base;
-        JSString *s;        // if s==NULL, d and base are not valid
-    } dtoaCache;
 
     /* Base address of the native stack for the current thread. */
     jsuword             *nativeStackBase;
@@ -1533,12 +1519,6 @@ namespace js {
 
 class AutoGCRooter;
 
-#define JS_HAS_OPTION(cx,option)        (((cx)->options & (option)) != 0)
-#define JS_HAS_STRICT_OPTION(cx)        JS_HAS_OPTION(cx, JSOPTION_STRICT)
-#define JS_HAS_WERROR_OPTION(cx)        JS_HAS_OPTION(cx, JSOPTION_WERROR)
-#define JS_HAS_COMPILE_N_GO_OPTION(cx)  JS_HAS_OPTION(cx, JSOPTION_COMPILE_N_GO)
-#define JS_HAS_ATLINE_OPTION(cx)        JS_HAS_OPTION(cx, JSOPTION_ATLINE)
-
 static inline bool
 OptionsHasXML(uint32 options)
 {
@@ -1567,9 +1547,10 @@ OptionsSameVersionFlags(uint32 self, uint32 other)
  * become invalid.
  */
 namespace VersionFlags {
-static const uint32 MASK        = 0x0FFF; /* see JSVersion in jspubtd.h */
-static const uint32 HAS_XML     = 0x1000; /* flag induced by XML option */
-static const uint32 ANONFUNFIX  = 0x2000; /* see jsapi.h comment on JSOPTION_ANONFUNFIX */
+static const uintN MASK         = 0x0FFF; /* see JSVersion in jspubtd.h */
+static const uintN HAS_XML      = 0x1000; /* flag induced by XML option */
+static const uintN ANONFUNFIX   = 0x2000; /* see jsapi.h comment on JSOPTION_ANONFUNFIX */
+static const uintN FULL_MASK    = 0x3FFF;
 }
 
 static inline JSVersion
@@ -1621,10 +1602,33 @@ VersionExtractFlags(JSVersion version)
     return JSVersion(uint32(version) & ~VersionFlags::MASK);
 }
 
+static inline void
+VersionCopyFlags(JSVersion *version, JSVersion from)
+{
+    *version = JSVersion(VersionNumber(*version) | VersionExtractFlags(from));
+}
+
 static inline bool
 VersionHasFlags(JSVersion version)
 {
     return !!VersionExtractFlags(version);
+}
+
+static inline uintN
+VersionFlagsToOptions(JSVersion version)
+{
+    uintN copts = (VersionHasXML(version) ? JSOPTION_XML : 0) |
+                  (VersionHasAnonFunFix(version) ? JSOPTION_ANONFUNFIX : 0);
+    JS_ASSERT((copts & JSCOMPILEOPTION_MASK) == copts);
+    return copts;
+}
+
+static inline JSVersion
+OptionFlagsToVersion(uintN options, JSVersion version)
+{
+    VersionSetXML(&version, OptionsHasXML(options));
+    VersionSetAnonFunFix(&version, OptionsHasAnonFunFix(options));
+    return version;
 }
 
 static inline bool
@@ -1632,6 +1636,10 @@ VersionIsKnown(JSVersion version)
 {
     return VersionNumber(version) != JSVERSION_UNKNOWN;
 }
+
+typedef js::HashSet<JSObject *,
+                    js::DefaultHasher<JSObject *>,
+                    js::SystemAllocPolicy> BusyArraysMap;
 
 } /* namespace js */
 
@@ -1652,10 +1660,10 @@ struct JSContext
     JSBool              throwing;           /* is there a pending exception? */
     js::Value           exception;          /* most-recently-thrown exception */
 
-  public:
-    /* Per-context options. */
-    uint32              options;            /* see jsapi.h for JSOPTION_* */
+    /* Per-context run options. */
+    uintN               runOptions;            /* see jsapi.h for JSOPTION_* */
 
+  public:
     /* Locale specific callbacks for string conversion. */
     JSLocaleCallbacks   *localeCallbacks;
 
@@ -1732,7 +1740,7 @@ struct JSContext
 
     /* State for object and array toSource conversion. */
     JSSharpObjectMap    sharpObjectMap;
-    js::HashSet<JSObject *> busyArrays;
+    js::BusyArraysMap   busyArrays;
 
     /* Argument formatter support for JS_{Convert,Push}Arguments{,VA}. */
     JSArgumentFormatMap *argumentFormatMap;
@@ -1827,7 +1835,7 @@ struct JSContext
         return fp;
     }
 
-  private:
+  public:
     /*
      * The default script compilation version can be set iff there is no code running.
      * This typically occurs via the JSAPI right after a context is constructed.
@@ -1843,18 +1851,18 @@ struct JSContext
         hasVersionOverride = true;
     }
 
-  public:
-    void clearVersionOverride() {
-        hasVersionOverride = false;
-    }
-    
-    bool isVersionOverridden() const {
-        return hasVersionOverride;
-    }
-
     /* Set the default script compilation version. */
     void setDefaultVersion(JSVersion version) {
         defaultVersion = version;
+    }
+
+    void clearVersionOverride() { hasVersionOverride = false; }
+    JSVersion getDefaultVersion() const { return defaultVersion; }
+    bool isVersionOverridden() const { return hasVersionOverride; }
+
+    JSVersion getVersionOverride() const {
+        JS_ASSERT(isVersionOverridden());
+        return versionOverride;
     }
 
     /*
@@ -1870,6 +1878,23 @@ struct JSContext
         return true;
     }
 
+  private:
+    /*
+     * If there is no code currently executing, turn the override version into
+     * the default version.
+     *
+     * NB: the only time the version is potentially capable of migrating is
+     * on return from the Execute or ExternalInvoke paths as they call through
+     * JSContext::popSegmentAndFrame.
+     */
+    void maybeMigrateVersionOverride() {
+        if (JS_LIKELY(!isVersionOverridden() || currentSegment))
+            return;
+        defaultVersion = versionOverride;
+        clearVersionOverride();
+    }
+
+  public:
     /*
      * Return:
      * - The override version, if there is an override version.
@@ -1894,29 +1919,33 @@ struct JSContext
         return defaultVersion;
     }
 
-    void optionFlagsToVersion(JSVersion *version) const {
-        js::VersionSetXML(version, js::OptionsHasXML(options));
-        js::VersionSetAnonFunFix(version, js::OptionsHasAnonFunFix(options));
-    }
-
-    void checkOptionVersionSync() const {
-#ifdef DEBUG
-        JSVersion version = findVersion();
-        JS_ASSERT(js::VersionHasXML(version) == js::OptionsHasXML(options));
-        JS_ASSERT(js::VersionHasAnonFunFix(version) == js::OptionsHasAnonFunFix(options));
-#endif
+    void setRunOptions(uintN ropts) {
+        JS_ASSERT((ropts & JSRUNOPTION_MASK) == ropts);
+        runOptions = ropts;
     }
 
     /* Note: may override the version. */
-    void syncOptionsToVersion() {
-        JSVersion version = findVersion();
-        if (js::OptionsHasXML(options) == js::VersionHasXML(version) &&
-            js::OptionsHasAnonFunFix(options) == js::VersionHasAnonFunFix(version))
+    void setCompileOptions(uintN newcopts) {
+        JS_ASSERT((newcopts & JSCOMPILEOPTION_MASK) == newcopts);
+        if (JS_LIKELY(getCompileOptions() == newcopts))
             return;
-        js::VersionSetXML(&version, js::OptionsHasXML(options));
-        js::VersionSetAnonFunFix(&version, js::OptionsHasAnonFunFix(options));
-        maybeOverrideVersion(version);
+        JSVersion version = findVersion();
+        JSVersion newVersion = js::OptionFlagsToVersion(newcopts, version);
+        maybeOverrideVersion(newVersion);
     }
+
+    uintN getRunOptions() const { return runOptions; }
+    uintN getCompileOptions() const { return js::VersionFlagsToOptions(findVersion()); }
+    uintN allOptions() const { return getRunOptions() | getCompileOptions(); }
+
+    bool hasRunOption(uintN ropt) const {
+        JS_ASSERT((ropt & JSRUNOPTION_MASK) == ropt);
+        return !!(runOptions & ropt);
+    }
+
+    bool hasStrictOption() const { return hasRunOption(JSOPTION_STRICT); }
+    bool hasWErrorOption() const { return hasRunOption(JSOPTION_WERROR); }
+    bool hasAtLineOption() const { return hasRunOption(JSOPTION_ATLINE); }
 
 #ifdef JS_THREADSAFE
     JSThread            *thread;
@@ -2133,9 +2162,6 @@ struct JSContext
      * a boolean flag to minimize the amount of code in its inlined callers.
      */
     JS_FRIEND_API(void) checkMallocGCPressure(void *p);
-
-    /* To silence MSVC warning about using 'this' in a member initializer. */
-    JSContext *thisInInitializer() { return this; }
 }; /* struct JSContext */
 
 #ifdef JS_THREADSAFE
@@ -3366,7 +3392,7 @@ NewIdArray(JSContext *cx, jsint length);
 #pragma warning(pop)
 #endif
 
-#ifdef JS_UNDEFD_MOZALLOC_WRAPPERS
+#ifdef JS_CNTXT_UNDEFD_MOZALLOC_WRAPPERS
 #  include "mozilla/mozalloc_macro_wrappers.h"
 #endif
 
