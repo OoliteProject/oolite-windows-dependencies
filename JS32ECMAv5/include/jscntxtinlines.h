@@ -248,7 +248,7 @@ StackSpace::pushInvokeArgs(JSContext *cx, uintN argc, InvokeArgsGuard *ag)
 
     Value *vp = start;
     Value *vpend = vp + nvals;
-    /* Don't need to MakeValueRangeGCSafe: the VM stack is conservatively marked. */
+    /* Don't need to MakeRangeGCSafe: the VM stack is conservatively marked. */
 
     /* Use invokeArgEnd to root [vp, vpend) until the frame is pushed. */
     ag->prevInvokeArgEnd = invokeArgEnd;
@@ -327,7 +327,11 @@ StackSpace::getCallFrame(JSContext *cx, Value *firstUnused, uintN nactual,
     uintN ncopy = 2 + nformal;
     if (JS_UNLIKELY(!check(*this, cx, firstUnused, ncopy + nvals)))
         return NULL;
-    memcpy(firstUnused, firstUnused - (2 + nactual), ncopy * sizeof(Value));
+
+    Value *dst = firstUnused;
+    Value *src = firstUnused - (2 + nactual);
+    PodCopy(dst, src, ncopy);
+    Debug_SetValueRangeToCrashOnTouch(src, ncopy);
     return reinterpret_cast<JSStackFrame *>(firstUnused + ncopy);
 }
 
@@ -702,6 +706,8 @@ CallJSNative(JSContext *cx, js::Native native, uintN argc, js::Value *vp)
     return ok;
 }
 
+extern JSBool CallOrConstructBoundFunction(JSContext *, uintN, js::Value *);
+
 STATIC_PRECONDITION(ubound(vp) >= argc + 2)
 JS_ALWAYS_INLINE bool
 CallJSNativeConstructor(JSContext *cx, js::Native native, uintN argc, js::Value *vp)
@@ -724,10 +730,13 @@ CallJSNativeConstructor(JSContext *cx, js::Native native, uintN argc, js::Value 
      * Proxies are exceptions to both rules: they can return primitives and
      * they allow content to return the callee.
      *
+     * CallOrConstructBoundFunction is an exception as well because we
+     * might have used bind on a proxy function.
+     *
      * (new Object(Object)) returns the callee.
      */
     extern JSBool proxy_Construct(JSContext *, uintN, Value *);
-    JS_ASSERT_IF(native != proxy_Construct &&
+    JS_ASSERT_IF(native != proxy_Construct && native != js::CallOrConstructBoundFunction &&
                  (!callee->isFunction() || callee->getFunctionPrivate()->u.n.clasp != &js_ObjectClass),
                  !vp->isPrimitive() && callee != &vp[0].toObject());
 
@@ -745,15 +754,16 @@ CallJSPropertyOp(JSContext *cx, js::PropertyOp op, JSObject *obj, jsid id, js::V
 }
 
 JS_ALWAYS_INLINE bool
-CallJSPropertyOpSetter(JSContext *cx, js::PropertyOp op, JSObject *obj, jsid id, js::Value *vp)
+CallJSPropertyOpSetter(JSContext *cx, js::StrictPropertyOp op, JSObject *obj, jsid id,
+                       JSBool strict, js::Value *vp)
 {
     assertSameCompartment(cx, obj, id, *vp);
-    return op(cx, obj, id, vp);
+    return op(cx, obj, id, strict, vp);
 }
 
 inline bool
-CallSetter(JSContext *cx, JSObject *obj, jsid id, PropertyOp op, uintN attrs, uintN shortid,
-           js::Value *vp)
+CallSetter(JSContext *cx, JSObject *obj, jsid id, js::StrictPropertyOp op, uintN attrs,
+           uintN shortid, JSBool strict, js::Value *vp)
 {
     if (attrs & JSPROP_SETTER)
         return ExternalGetOrSet(cx, obj, id, CastAsObjectJsval(op), JSACC_WRITE, 1, vp, vp);
@@ -763,7 +773,7 @@ CallSetter(JSContext *cx, JSObject *obj, jsid id, PropertyOp op, uintN attrs, ui
 
     if (attrs & JSPROP_SHORTID)
         id = INT_TO_JSID(shortid);
-    return CallJSPropertyOpSetter(cx, op, obj, id, vp);
+    return CallJSPropertyOpSetter(cx, op, obj, id, strict, vp);
 }
 
 #ifdef JS_TRACER
@@ -797,7 +807,7 @@ CanLeaveTrace(JSContext *cx)
 {
     JS_ASSERT(JS_ON_TRACE(cx));
 #ifdef JS_TRACER
-    return JS_TRACE_MONITOR(cx).bailExit != NULL;
+    return JS_TRACE_MONITOR_ON_TRACE(cx)->bailExit != NULL;
 #else
     return JS_FALSE;
 #endif
