@@ -72,7 +72,7 @@
 #define HAVE_GETSYSTEMTIMEASFILETIME	1
 #define HAVE_SYSTEMTIMETOFILETIME	1
 
-#define MOZ_TRACE_JSCALLS		1
+#define	MOZ_TRACE_JSCALLS	1
 
 /* The configure script defines these if it doesn't #define
    JS_HAVE_STDINT_H.  */
