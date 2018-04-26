@@ -1,0 +1,10 @@
+To apply the SDL.dll patches on Windows, you will need to follow these steps:
+- Download  OoliteDevelopmentEnvironment - Light Edition installed, from
+  https://drive.google.com/file/d/12xoD3sT1D9yDmOBPp0DKJ0HXWD4-dJjd/view?usp=sharing. 
+  Instructions for setting it up can be found at http://www.aegidian.org/bb/viewtopic.php?t=5943.
+- Download the SDL-1.2.13 source code from https://sourceforge.net/projects/libsdl/files/SDL/1.2.13/SDL-1.2.13.tar.gz/download 
+- Extract the folder SDL-1.2.13 to an empty directory.
+- Copy the appropriate patch file to that same directory.
+- From the Oolite Development Environment console, cd to that folder and execute
+  `patch -s -d SDL-1.2.13 -p1 < OOSDLdll_x64.patch` or `patch -s -d SDL-1.2.13 -p1 < OOSDLdll_x86.patch`
+  and you are ready to cd to the updated SDL-1.2.13 folder and run 'make' inside it in order to bvuild SDL.dll.
