@@ -46865,33 +46865,24 @@ diff -ruN SDL-1.2.13/src/linux/SDL_syshaptic.c.bak SDL-1.2.13_OOx86/src/linux/SD
 diff -ruN SDL-1.2.13/src/video/wincommon/SDL_sysevents.c SDL-1.2.13_OOx86/src/video/wincommon/SDL_sysevents.c
 --- SDL-1.2.13/src/video/wincommon/SDL_sysevents.c	2007-12-31 04:48:02 +0000
 +++ SDL-1.2.13_OOx86/src/video/wincommon/SDL_sysevents.c	2018-04-23 17:05:11 +0000
-@@ -281,6 +281,7 @@
- }
- #endif /* WM_MOUSELEAVE */
- 
-+#if 0
- /* Function to retrieve the current keyboard modifiers */
- static void WIN_GetKeyboardState(void)
- {
-@@ -327,6 +328,7 @@
- 	SDL_SetModState(state);
- #endif /* !NO_GETKEYBOARDSTATE */
- }
-+#endif
- 
- /* The main Win32 event handler
- DJM: This is no longer static as (DX5/DIB)_CreateWindow needs it
-@@ -378,7 +380,9 @@
- 				}
- #endif
- 				posted = SDL_PrivateAppActive(1, appstate);
-+#if 0
- 				WIN_GetKeyboardState();
-+#endif
- 			} else {
- 				/* Lose the following states */
- 				appstate = SDL_APPINPUTFOCUS;
-@@ -557,7 +561,7 @@
+@@ -307,14 +307,14 @@
+ 			state |= KMOD_RCTRL;
+ 			kstate[SDLK_RCTRL] = SDL_PRESSED;
+ 		}
+-		if ( keyboard[VK_LMENU] & 0x80) {
++		/*if ( keyboard[VK_LMENU] & 0x80) {
+ 			state |= KMOD_LALT;
+ 			kstate[SDLK_LALT] = SDL_PRESSED;
+ 		}
+ 		if ( keyboard[VK_RMENU] & 0x80) {
+ 			state |= KMOD_RALT;
+ 			kstate[SDLK_RALT] = SDL_PRESSED;
+-		}
++		}*/
+ 		if ( keyboard[VK_NUMLOCK] & 0x01) {
+ 			state |= KMOD_NUM;
+ 			kstate[SDLK_NUMLOCK] = SDL_PRESSED;
+@@ -557,7 +557,7 @@
  #endif
  				}
  				posted = SDL_PrivateMouseButton(
@@ -46900,7 +46891,7 @@ diff -ruN SDL-1.2.13/src/video/wincommon/SDL_sysevents.c SDL-1.2.13_OOx86/src/vi
  
  				/*
  				 * MSDN says:
-@@ -579,7 +583,7 @@
+@@ -579,7 +579,7 @@
  #if (_WIN32_WINNT >= 0x0400) || (_WIN32_WINDOWS > 0x0400)
  		case WM_MOUSEWHEEL: 
  			if ( SDL_VideoSurface && ! DINPUT_FULLSCREEN() ) {
@@ -46909,7 +46900,7 @@ diff -ruN SDL-1.2.13/src/video/wincommon/SDL_sysevents.c SDL-1.2.13_OOx86/src/vi
  				if ( move ) {
  					Uint8 button;
  					if ( move > 0 )
-@@ -587,9 +591,9 @@
+@@ -587,9 +587,9 @@
  					else
  						button = SDL_BUTTON_WHEELDOWN;
  					posted = SDL_PrivateMouseButton(
