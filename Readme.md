@@ -113,7 +113,7 @@ The changes in brief:
 - Backported haptic devices support from later SDL version. This allows force feedback joysticks to work in the game.
 - Added mousewheel delta support in the Windows port of Oolite for smoother mousewheel end-user experience.
 - Fixed Alt key state not being recognized correctly when returning to the app via Alt-Tab. This is a fix backported from SDL 1.2.15.
-- Added capability to accept float pixel types fwhen creating OpenGL window.
+- Added capability to accept float pixel types when creating OpenGL window.
 
 ### SpiderMonkey v1.85
 Specific build settings for Oolite are required. Library rebuilt with `MOZ_TRACE_JSCALLS` defined in order to enable full JavaScript profiling.
