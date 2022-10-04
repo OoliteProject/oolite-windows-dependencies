@@ -1,6 +1,9 @@
 # Oolite Windows dependencies
 This repository contains binary dependencies used to build Oolite for Windows. It is included as a submodule in the main Oolite repository.
 
+Note: As of October 2022, the 32-bit version of the game is no longer supported. 32-bit libraries are frozen and development continues with the 64-bit versions only.
+
+
 The documented build process for Oolite for Windows will pull in these pre-built dependencies with no additional work required. The rest of this file documents how to reproduce the changes made.
 
 
@@ -109,6 +112,8 @@ The changes in brief:
 - Fixed crash occurring when attempting to set the screen gamma value. This fix occurred in a later version of SDL and was backported to the version used with the Windows port of Oolite.
 - Backported haptic devices support from later SDL version. This allows force feedback joysticks to work in the game.
 - Added mousewheel delta support in the Windows port of Oolite for smoother mousewheel end-user experience.
+- Fixed Alt key state not being recognized correctly when returning to the app via Alt-Tab. This is a fix backported from SDL 1.2.15.
+- Added capability to accept float pixel types fwhen creating OpenGL window.
 
 ### SpiderMonkey v1.85
 Specific build settings for Oolite are required. Library rebuilt with `MOZ_TRACE_JSCALLS` defined in order to enable full JavaScript profiling.

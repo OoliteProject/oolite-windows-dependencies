@@ -1,6 +1,6 @@
-diff -ruN SDL-1.2.13/Makefile SDL-1.2.13_OOx64/Makefile
---- SDL-1.2.13/Makefile	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/Makefile	2017-12-20 13:11:43 +0000
+diff -ruN SDL-1.2.13/Makefile SDL-1.2.13_new/Makefile
+--- SDL-1.2.13/Makefile	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/Makefile	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,184 @@
 +# Makefile to build and install the SDL library
 +
@@ -186,9 +186,9 @@ diff -ruN SDL-1.2.13/Makefile SDL-1.2.13_OOx64/Makefile
 +	rm -f $(HOME)/SDL-1.2.zip
 +	zip -r $(HOME)/SDL-1.2.zip SDL-1.2
 +	rm -rf SDL-1.2
-diff -ruN SDL-1.2.13/Makefile.bak SDL-1.2.13_OOx64/Makefile.bak
---- SDL-1.2.13/Makefile.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/Makefile.bak	2017-12-19 14:35:35 +0000
+diff -ruN SDL-1.2.13/Makefile.bak SDL-1.2.13_new/Makefile.bak
+--- SDL-1.2.13/Makefile.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/Makefile.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,182 @@
 +# Makefile to build and install the SDL library
 +
@@ -372,9 +372,9 @@ diff -ruN SDL-1.2.13/Makefile.bak SDL-1.2.13_OOx64/Makefile.bak
 +	rm -f $(HOME)/SDL-1.2.zip
 +	zip -r $(HOME)/SDL-1.2.zip SDL-1.2
 +	rm -rf SDL-1.2
-diff -ruN SDL-1.2.13/Makefile.in SDL-1.2.13_OOx64/Makefile.in
---- SDL-1.2.13/Makefile.in	2007-12-31 05:09:33 +0000
-+++ SDL-1.2.13_OOx64/Makefile.in	2017-12-18 11:47:34 +0000
+diff -ruN SDL-1.2.13/Makefile.in SDL-1.2.13_new/Makefile.in
+--- SDL-1.2.13/Makefile.in	2007-12-31 07:09:33 +0200
++++ SDL-1.2.13_new/Makefile.in	2022-09-11 18:22:31 +0300
 @@ -42,7 +42,7 @@
  
  DIST = acinclude.m4 autogen.sh Borland.html Borland.zip BUGS build-scripts configure configure.in COPYING CREDITS CWprojects.sea.bin docs docs.html include INSTALL Makefile.dc Makefile.minimal Makefile.in MPWmake.sea.bin README* sdl-config.in sdl.m4 sdl.pc.in SDL.qpg.in SDL.spec SDL.spec.in src test TODO VisualCE.zip VisualC.html VisualC.zip Watcom-OS2.zip Watcom-Win32.zip symbian.zip WhatsNew Xcode.tar.gz
@@ -384,9 +384,9 @@ diff -ruN SDL-1.2.13/Makefile.in SDL-1.2.13_OOx64/Makefile.in
  
  LT_AGE      = @LT_AGE@
  LT_CURRENT  = @LT_CURRENT@
-diff -ruN SDL-1.2.13/Makefile.in.beforeHaptic SDL-1.2.13_OOx64/Makefile.in.beforeHaptic
---- SDL-1.2.13/Makefile.in.beforeHaptic	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/Makefile.in.beforeHaptic	2007-12-30 19:09:34 +0000
+diff -ruN SDL-1.2.13/Makefile.in.beforeHaptic SDL-1.2.13_new/Makefile.in.beforeHaptic
+--- SDL-1.2.13/Makefile.in.beforeHaptic	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/Makefile.in.beforeHaptic	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,182 @@
 +# Makefile to build and install the SDL library
 +
@@ -570,9 +570,9 @@ diff -ruN SDL-1.2.13/Makefile.in.beforeHaptic SDL-1.2.13_OOx64/Makefile.in.befor
 +	rm -f $(HOME)/SDL-1.2.zip
 +	zip -r $(HOME)/SDL-1.2.zip SDL-1.2
 +	rm -rf SDL-1.2
-diff -ruN SDL-1.2.13/Makefile.minimal SDL-1.2.13_OOx64/Makefile.minimal
---- SDL-1.2.13/Makefile.minimal	2007-12-31 04:48:39 +0000
-+++ SDL-1.2.13_OOx64/Makefile.minimal	2017-12-20 15:18:45 +0000
+diff -ruN SDL-1.2.13/Makefile.minimal SDL-1.2.13_new/Makefile.minimal
+--- SDL-1.2.13/Makefile.minimal	2007-12-31 06:48:39 +0200
++++ SDL-1.2.13_new/Makefile.minimal	2022-09-11 18:22:31 +0300
 @@ -15,6 +15,7 @@
  	src/events/*.c \
  	src/file/*.c \
@@ -589,9 +589,9 @@ diff -ruN SDL-1.2.13/Makefile.minimal SDL-1.2.13_OOx64/Makefile.minimal
  	src/cdrom/dummy/*.c \
  	src/thread/generic/*.c \
  	src/timer/dummy/*.c \
-diff -ruN SDL-1.2.13/Makefile.minimal.bak SDL-1.2.13_OOx64/Makefile.minimal.bak
---- SDL-1.2.13/Makefile.minimal.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/Makefile.minimal.bak	2007-12-30 18:48:40 +0000
+diff -ruN SDL-1.2.13/Makefile.minimal.bak SDL-1.2.13_new/Makefile.minimal.bak
+--- SDL-1.2.13/Makefile.minimal.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/Makefile.minimal.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,42 @@
 +# Makefile to build the SDL library
 +
@@ -635,9 +635,9 @@ diff -ruN SDL-1.2.13/Makefile.minimal.bak SDL-1.2.13_OOx64/Makefile.minimal.bak
 +
 +clean:
 +	rm -f $(TARGET) $(OBJECTS)
-diff -ruN SDL-1.2.13/Makefile.minimal.beforeHaptic SDL-1.2.13_OOx64/Makefile.minimal.beforeHaptic
---- SDL-1.2.13/Makefile.minimal.beforeHaptic	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/Makefile.minimal.beforeHaptic	2017-10-09 21:48:02 +0000
+diff -ruN SDL-1.2.13/Makefile.minimal.beforeHaptic SDL-1.2.13_new/Makefile.minimal.beforeHaptic
+--- SDL-1.2.13/Makefile.minimal.beforeHaptic	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/Makefile.minimal.beforeHaptic	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,42 @@
 +# Makefile to build the SDL library
 +
@@ -681,9 +681,9 @@ diff -ruN SDL-1.2.13/Makefile.minimal.beforeHaptic SDL-1.2.13_OOx64/Makefile.min
 +
 +clean:
 +	rm -f $(TARGET) $(OBJECTS)
-diff -ruN SDL-1.2.13/Makefile.original SDL-1.2.13_OOx64/Makefile.original
---- SDL-1.2.13/Makefile.original	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/Makefile.original	2009-02-08 10:09:34 +0000
+diff -ruN SDL-1.2.13/Makefile.original SDL-1.2.13_new/Makefile.original
+--- SDL-1.2.13/Makefile.original	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/Makefile.original	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,182 @@
 +# Makefile to build and install the SDL library
 +
@@ -867,9 +867,9 @@ diff -ruN SDL-1.2.13/Makefile.original SDL-1.2.13_OOx64/Makefile.original
 +	rm -f $(HOME)/SDL-1.2.zip
 +	zip -r $(HOME)/SDL-1.2.zip SDL-1.2
 +	rm -rf SDL-1.2
-diff -ruN SDL-1.2.13/Makefile____orig SDL-1.2.13_OOx64/Makefile____orig
---- SDL-1.2.13/Makefile____orig	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/Makefile____orig	2012-04-23 09:18:52 +0000
+diff -ruN SDL-1.2.13/Makefile____orig SDL-1.2.13_new/Makefile____orig
+--- SDL-1.2.13/Makefile____orig	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/Makefile____orig	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,182 @@
 +# Makefile to build and install the SDL library
 +
@@ -1053,9 +1053,9 @@ diff -ruN SDL-1.2.13/Makefile____orig SDL-1.2.13_OOx64/Makefile____orig
 +	rm -f $(HOME)/SDL-1.2.zip
 +	zip -r $(HOME)/SDL-1.2.zip SDL-1.2
 +	rm -rf SDL-1.2
-diff -ruN SDL-1.2.13/SDL.qpg SDL-1.2.13_OOx64/SDL.qpg
---- SDL-1.2.13/SDL.qpg	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/SDL.qpg	2013-10-03 18:42:36 +0000
+diff -ruN SDL-1.2.13/SDL.qpg SDL-1.2.13_new/SDL.qpg
+--- SDL-1.2.13/SDL.qpg	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/SDL.qpg	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,140 @@
 +<QPG:Generation>
 +   <QPG:Options>
@@ -1197,9 +1197,9 @@ diff -ruN SDL-1.2.13/SDL.qpg SDL-1.2.13_OOx64/SDL.qpg
 +
 +   </QPG:Values>
 +</QPG:Generation>
-diff -ruN SDL-1.2.13/build-deps SDL-1.2.13_OOx64/build-deps
---- SDL-1.2.13/build-deps	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/build-deps	2017-12-20 12:21:32 +0000
+diff -ruN SDL-1.2.13/build-deps SDL-1.2.13_new/build-deps
+--- SDL-1.2.13/build-deps	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/build-deps	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1537 @@
 +$(objects)/SDL.lo: ./src/SDL.c \
 +	./include/SDL.h \
@@ -2738,9 +2738,9 @@ diff -ruN SDL-1.2.13/build-deps SDL-1.2.13_OOx64/build-deps
 +
 +$(objects)/SDL_win32_main.o: ./src/main/win32/SDL_win32_main.c
 +	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/main/win32/SDL_win32_main.c -o $@
-diff -ruN SDL-1.2.13/build-deps.bak SDL-1.2.13_OOx64/build-deps.bak
---- SDL-1.2.13/build-deps.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/build-deps.bak	2013-10-03 18:44:02 +0000
+diff -ruN SDL-1.2.13/build-deps.bak SDL-1.2.13_new/build-deps.bak
+--- SDL-1.2.13/build-deps.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/build-deps.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1459 @@
 +$(objects)/SDL.lo: ./src/SDL.c \
 +	./include/SDL.h \
@@ -4201,9 +4201,9 @@ diff -ruN SDL-1.2.13/build-deps.bak SDL-1.2.13_OOx64/build-deps.bak
 +
 +$(objects)/SDL_win32_main.o: ./src/main/win32/SDL_win32_main.c
 +	$(CC) $(CFLAGS) $(EXTRA_CFLAGS) -c ./src/main/win32/SDL_win32_main.c -o $@
-diff -ruN SDL-1.2.13/config.log SDL-1.2.13_OOx64/config.log
---- SDL-1.2.13/config.log	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/config.log	2013-10-03 18:44:02 +0000
+diff -ruN SDL-1.2.13/config.log SDL-1.2.13_new/config.log
+--- SDL-1.2.13/config.log	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/config.log	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,2315 @@
 +This file contains any messages produced by compilers while
 +running configure, to aid debugging if configure makes a mistake.
@@ -6520,9 +6520,9 @@ diff -ruN SDL-1.2.13/config.log SDL-1.2.13_OOx64/config.log
 +#define SDL_LOADSO_WIN32 1
 +
 +configure: exit 0
-diff -ruN SDL-1.2.13/config.status SDL-1.2.13_OOx64/config.status
---- SDL-1.2.13/config.status	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/config.status	2013-10-03 18:42:32 +0000
+diff -ruN SDL-1.2.13/config.status SDL-1.2.13_new/config.status
+--- SDL-1.2.13/config.status	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/config.status	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1015 @@
 +#! /bin/sh
 +# Generated by configure.
@@ -7539,9 +7539,9 @@ diff -ruN SDL-1.2.13/config.status SDL-1.2.13_OOx64/config.status
 +
 +
 +{ (exit 0); exit 0; }
-diff -ruN SDL-1.2.13/configure.in SDL-1.2.13_OOx64/configure.in
---- SDL-1.2.13/configure.in	2007-12-31 04:48:39 +0000
-+++ SDL-1.2.13_OOx64/configure.in	2017-12-18 15:21:36 +0000
+diff -ruN SDL-1.2.13/configure.in SDL-1.2.13_new/configure.in
+--- SDL-1.2.13/configure.in	2007-12-31 06:48:39 +0200
++++ SDL-1.2.13_new/configure.in	2022-09-11 18:22:31 +0300
 @@ -244,6 +244,14 @@
  else
      SOURCES="$SOURCES $srcdir/src/joystick/*.c"
@@ -7633,9 +7633,9 @@ diff -ruN SDL-1.2.13/configure.in SDL-1.2.13_OOx64/configure.in
  if test x$have_cdrom != xyes; then
      if test x$enable_cdrom = xyes; then
          AC_DEFINE(SDL_CDROM_DISABLED)
-diff -ruN SDL-1.2.13/configure.in.beforeHaptic SDL-1.2.13_OOx64/configure.in.beforeHaptic
---- SDL-1.2.13/configure.in.beforeHaptic	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/configure.in.beforeHaptic	2007-12-30 18:48:40 +0000
+diff -ruN SDL-1.2.13/configure.in.beforeHaptic SDL-1.2.13_new/configure.in.beforeHaptic
+--- SDL-1.2.13/configure.in.beforeHaptic	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/configure.in.beforeHaptic	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,2798 @@
 +dnl Process this file with autoconf to produce a configure script.
 +AC_INIT(README)
@@ -10435,9 +10435,9 @@ diff -ruN SDL-1.2.13/configure.in.beforeHaptic SDL-1.2.13_OOx64/configure.in.bef
 +    : >build-deps
 +    if test x"$MAKE" = x; then MAKE=make; fi; $MAKE depend
 +])
-diff -ruN SDL-1.2.13/include/SDL.h SDL-1.2.13_OOx64/include/SDL.h
---- SDL-1.2.13/include/SDL.h	2007-12-31 04:48:36 +0000
-+++ SDL-1.2.13_OOx64/include/SDL.h	2017-12-19 13:41:45 +0000
+diff -ruN SDL-1.2.13/include/SDL.h SDL-1.2.13_new/include/SDL.h
+--- SDL-1.2.13/include/SDL.h	2007-12-31 06:48:36 +0200
++++ SDL-1.2.13_new/include/SDL.h	2022-09-11 18:22:31 +0300
 @@ -57,6 +57,7 @@
  #define SDL_INIT_VIDEO		0x00000020
  #define SDL_INIT_CDROM		0x00000100
@@ -10446,9 +10446,9 @@ diff -ruN SDL-1.2.13/include/SDL.h SDL-1.2.13_OOx64/include/SDL.h
  #define SDL_INIT_NOPARACHUTE	0x00100000	/* Don't catch fatal signals */
  #define SDL_INIT_EVENTTHREAD	0x01000000	/* Not supported on all OS's */
  #define SDL_INIT_EVERYTHING	0x0000FFFF
-diff -ruN SDL-1.2.13/include/SDL.h.bak SDL-1.2.13_OOx64/include/SDL.h.bak
---- SDL-1.2.13/include/SDL.h.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/SDL.h.bak	2007-12-30 18:48:36 +0000
+diff -ruN SDL-1.2.13/include/SDL.h.bak SDL-1.2.13_new/include/SDL.h.bak
+--- SDL-1.2.13/include/SDL.h.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/SDL.h.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,94 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -10544,9 +10544,9 @@ diff -ruN SDL-1.2.13/include/SDL.h.bak SDL-1.2.13_OOx64/include/SDL.h.bak
 +#include "close_code.h"
 +
 +#endif /* _SDL_H */
-diff -ruN SDL-1.2.13/include/SDL_config.h SDL-1.2.13_OOx64/include/SDL_config.h
---- SDL-1.2.13/include/SDL_config.h	2007-12-31 06:17:05 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config.h	2017-12-19 13:48:30 +0000
+diff -ruN SDL-1.2.13/include/SDL_config.h SDL-1.2.13_new/include/SDL_config.h
+--- SDL-1.2.13/include/SDL_config.h	2007-12-31 08:17:05 +0200
++++ SDL-1.2.13_new/include/SDL_config.h	2022-09-11 18:22:31 +0300
 @@ -1,3 +1,4 @@
 +/* include/SDL_config.h.  Generated from SDL_config.h.in by configure.  */
  /*
@@ -10859,9 +10859,9 @@ diff -ruN SDL-1.2.13/include/SDL_config.h SDL-1.2.13_OOx64/include/SDL_config.h
 +/* #undef SDL_ALTIVEC_BLITTERS */
  
  #endif /* _SDL_config_h */
-diff -ruN SDL-1.2.13/include/SDL_config.h.bak SDL-1.2.13_OOx64/include/SDL_config.h.bak
---- SDL-1.2.13/include/SDL_config.h.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config.h.bak	2017-12-19 13:42:59 +0000
+diff -ruN SDL-1.2.13/include/SDL_config.h.bak SDL-1.2.13_new/include/SDL_config.h.bak
+--- SDL-1.2.13/include/SDL_config.h.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/SDL_config.h.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,314 @@
 +/* include/SDL_config.h.  Generated from SDL_config.h.in by configure.  */
 +/*
@@ -11177,9 +11177,9 @@ diff -ruN SDL-1.2.13/include/SDL_config.h.bak SDL-1.2.13_OOx64/include/SDL_confi
 +/* #undef SDL_ALTIVEC_BLITTERS */
 +
 +#endif /* _SDL_config_h */
-diff -ruN SDL-1.2.13/include/SDL_config.h.in SDL-1.2.13_OOx64/include/SDL_config.h.in
---- SDL-1.2.13/include/SDL_config.h.in	2007-12-31 04:48:36 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config.h.in	2017-12-20 14:55:27 +0000
+diff -ruN SDL-1.2.13/include/SDL_config.h.in SDL-1.2.13_new/include/SDL_config.h.in
+--- SDL-1.2.13/include/SDL_config.h.in	2007-12-31 06:48:36 +0200
++++ SDL-1.2.13_new/include/SDL_config.h.in	2022-09-11 18:22:31 +0300
 @@ -149,6 +149,7 @@
  #undef SDL_CPUINFO_DISABLED
  #undef SDL_EVENTS_DISABLED
@@ -11199,9 +11199,9 @@ diff -ruN SDL-1.2.13/include/SDL_config.h.in SDL-1.2.13_OOx64/include/SDL_config
  
  /* Enable various shared object loading systems */
  #undef SDL_LOADSO_BEOS
-diff -ruN SDL-1.2.13/include/SDL_config.h.in.bak SDL-1.2.13_OOx64/include/SDL_config.h.in.bak
---- SDL-1.2.13/include/SDL_config.h.in.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config.h.in.bak	2007-12-30 18:48:36 +0000
+diff -ruN SDL-1.2.13/include/SDL_config.h.in.bak SDL-1.2.13_new/include/SDL_config.h.in.bak
+--- SDL-1.2.13/include/SDL_config.h.in.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/SDL_config.h.in.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,306 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -11509,9 +11509,9 @@ diff -ruN SDL-1.2.13/include/SDL_config.h.in.bak SDL-1.2.13_OOx64/include/SDL_co
 +#undef SDL_ALTIVEC_BLITTERS
 +
 +#endif /* _SDL_config_h */
-diff -ruN SDL-1.2.13/include/SDL_config_dreamcast.h SDL-1.2.13_OOx64/include/SDL_config_dreamcast.h
---- SDL-1.2.13/include/SDL_config_dreamcast.h	2007-12-31 04:48:36 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config_dreamcast.h	2017-12-20 14:55:56 +0000
+diff -ruN SDL-1.2.13/include/SDL_config_dreamcast.h SDL-1.2.13_new/include/SDL_config_dreamcast.h
+--- SDL-1.2.13/include/SDL_config_dreamcast.h	2007-12-31 06:48:36 +0200
++++ SDL-1.2.13_new/include/SDL_config_dreamcast.h	2022-09-11 18:22:31 +0300
 @@ -89,6 +89,7 @@
  
  /* Enable various input drivers */
@@ -11520,9 +11520,9 @@ diff -ruN SDL-1.2.13/include/SDL_config_dreamcast.h SDL-1.2.13_OOx64/include/SDL
  
  /* Enable various shared object loading systems */
  #define SDL_LOADSO_DUMMY	1
-diff -ruN SDL-1.2.13/include/SDL_config_dreamcast.h.bak SDL-1.2.13_OOx64/include/SDL_config_dreamcast.h.bak
---- SDL-1.2.13/include/SDL_config_dreamcast.h.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config_dreamcast.h.bak	2007-12-30 18:48:36 +0000
+diff -ruN SDL-1.2.13/include/SDL_config_dreamcast.h.bak SDL-1.2.13_new/include/SDL_config_dreamcast.h.bak
+--- SDL-1.2.13/include/SDL_config_dreamcast.h.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/SDL_config_dreamcast.h.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,106 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -11630,9 +11630,9 @@ diff -ruN SDL-1.2.13/include/SDL_config_dreamcast.h.bak SDL-1.2.13_OOx64/include
 +#define SDL_VIDEO_DRIVER_DUMMY	1
 +
 +#endif /* _SDL_config_dreamcast_h */
-diff -ruN SDL-1.2.13/include/SDL_config_macosx.h SDL-1.2.13_OOx64/include/SDL_config_macosx.h
---- SDL-1.2.13/include/SDL_config_macosx.h	2007-12-31 04:48:36 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config_macosx.h	2017-12-20 14:56:41 +0000
+diff -ruN SDL-1.2.13/include/SDL_config_macosx.h SDL-1.2.13_new/include/SDL_config_macosx.h
+--- SDL-1.2.13/include/SDL_config_macosx.h	2007-12-31 06:48:36 +0200
++++ SDL-1.2.13_new/include/SDL_config_macosx.h	2022-09-11 18:22:31 +0300
 @@ -99,6 +99,7 @@
  
  /* Enable various input drivers */
@@ -11653,9 +11653,9 @@ diff -ruN SDL-1.2.13/include/SDL_config_macosx.h SDL-1.2.13_OOx64/include/SDL_co
  
  /* Enable assembly routines */
  #define SDL_ASSEMBLY_ROUTINES	1
-diff -ruN SDL-1.2.13/include/SDL_config_macosx.h.bak SDL-1.2.13_OOx64/include/SDL_config_macosx.h.bak
---- SDL-1.2.13/include/SDL_config_macosx.h.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config_macosx.h.bak	2007-12-30 18:48:36 +0000
+diff -ruN SDL-1.2.13/include/SDL_config_macosx.h.bak SDL-1.2.13_new/include/SDL_config_macosx.h.bak
+--- SDL-1.2.13/include/SDL_config_macosx.h.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/SDL_config_macosx.h.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,135 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -11792,9 +11792,9 @@ diff -ruN SDL-1.2.13/include/SDL_config_macosx.h.bak SDL-1.2.13_OOx64/include/SD
 +#endif
 +
 +#endif /* _SDL_config_macosx_h */
-diff -ruN SDL-1.2.13/include/SDL_config_minimal.h SDL-1.2.13_OOx64/include/SDL_config_minimal.h
---- SDL-1.2.13/include/SDL_config_minimal.h	2007-12-31 04:48:36 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config_minimal.h	2017-12-20 14:57:03 +0000
+diff -ruN SDL-1.2.13/include/SDL_config_minimal.h SDL-1.2.13_new/include/SDL_config_minimal.h
+--- SDL-1.2.13/include/SDL_config_minimal.h	2007-12-31 06:48:36 +0200
++++ SDL-1.2.13_new/include/SDL_config_minimal.h	2022-09-11 18:22:31 +0300
 @@ -47,6 +47,9 @@
  /* Enable the stub joystick driver (src/joystick/dummy/\*.c) */
  #define SDL_JOYSTICK_DISABLED	1
@@ -11805,9 +11805,9 @@ diff -ruN SDL-1.2.13/include/SDL_config_minimal.h SDL-1.2.13_OOx64/include/SDL_c
  /* Enable the stub shared object loader (src/loadso/dummy/\*.c) */
  #define SDL_LOADSO_DISABLED	1
  
-diff -ruN SDL-1.2.13/include/SDL_config_minimal.h.bak SDL-1.2.13_OOx64/include/SDL_config_minimal.h.bak
---- SDL-1.2.13/include/SDL_config_minimal.h.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config_minimal.h.bak	2007-12-30 18:48:36 +0000
+diff -ruN SDL-1.2.13/include/SDL_config_minimal.h.bak SDL-1.2.13_new/include/SDL_config_minimal.h.bak
+--- SDL-1.2.13/include/SDL_config_minimal.h.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/SDL_config_minimal.h.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,62 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -11871,9 +11871,9 @@ diff -ruN SDL-1.2.13/include/SDL_config_minimal.h.bak SDL-1.2.13_OOx64/include/S
 +#define SDL_VIDEO_DRIVER_DUMMY	1
 +
 +#endif /* _SDL_config_minimal_h */
-diff -ruN SDL-1.2.13/include/SDL_config_os2.h SDL-1.2.13_OOx64/include/SDL_config_os2.h
---- SDL-1.2.13/include/SDL_config_os2.h	2007-12-31 04:48:36 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config_os2.h	2017-12-20 14:57:16 +0000
+diff -ruN SDL-1.2.13/include/SDL_config_os2.h SDL-1.2.13_new/include/SDL_config_os2.h
+--- SDL-1.2.13/include/SDL_config_os2.h	2007-12-31 06:48:36 +0200
++++ SDL-1.2.13_new/include/SDL_config_os2.h	2022-09-11 18:22:31 +0300
 @@ -118,6 +118,7 @@
  
  /* Enable various input drivers */
@@ -11882,9 +11882,9 @@ diff -ruN SDL-1.2.13/include/SDL_config_os2.h SDL-1.2.13_OOx64/include/SDL_confi
  
  /* Enable various shared object loading systems */
  #define SDL_LOADSO_OS2	1
-diff -ruN SDL-1.2.13/include/SDL_config_os2.h.bak SDL-1.2.13_OOx64/include/SDL_config_os2.h.bak
---- SDL-1.2.13/include/SDL_config_os2.h.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config_os2.h.bak	2007-12-30 18:48:36 +0000
+diff -ruN SDL-1.2.13/include/SDL_config_os2.h.bak SDL-1.2.13_new/include/SDL_config_os2.h.bak
+--- SDL-1.2.13/include/SDL_config_os2.h.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/SDL_config_os2.h.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,141 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -12027,9 +12027,9 @@ diff -ruN SDL-1.2.13/include/SDL_config_os2.h.bak SDL-1.2.13_OOx64/include/SDL_c
 +#define SDL_ASSEMBLY_ROUTINES	1
 +
 +#endif /* _SDL_config_os2_h */
-diff -ruN SDL-1.2.13/include/SDL_config_win32.h SDL-1.2.13_OOx64/include/SDL_config_win32.h
---- SDL-1.2.13/include/SDL_config_win32.h	2007-12-31 04:48:36 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config_win32.h	2017-12-19 13:45:52 +0000
+diff -ruN SDL-1.2.13/include/SDL_config_win32.h SDL-1.2.13_new/include/SDL_config_win32.h
+--- SDL-1.2.13/include/SDL_config_win32.h	2007-12-31 06:48:36 +0200
++++ SDL-1.2.13_new/include/SDL_config_win32.h	2022-09-11 18:22:31 +0300
 @@ -139,8 +139,10 @@
  /* Enable various input drivers */
  #ifdef _WIN32_WCE
@@ -12041,9 +12041,9 @@ diff -ruN SDL-1.2.13/include/SDL_config_win32.h SDL-1.2.13_OOx64/include/SDL_con
  #endif
  
  /* Enable various shared object loading systems */
-diff -ruN SDL-1.2.13/include/SDL_config_win32.h.bak SDL-1.2.13_OOx64/include/SDL_config_win32.h.bak
---- SDL-1.2.13/include/SDL_config_win32.h.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_config_win32.h.bak	2007-12-30 18:48:36 +0000
+diff -ruN SDL-1.2.13/include/SDL_config_win32.h.bak SDL-1.2.13_new/include/SDL_config_win32.h.bak
+--- SDL-1.2.13/include/SDL_config_win32.h.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/SDL_config_win32.h.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,180 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -12225,9 +12225,9 @@ diff -ruN SDL-1.2.13/include/SDL_config_win32.h.bak SDL-1.2.13_OOx64/include/SDL
 +#endif
 +
 +#endif /* _SDL_config_win32_h */
-diff -ruN SDL-1.2.13/include/SDL_events.h SDL-1.2.13_OOx64/include/SDL_events.h
---- SDL-1.2.13/include/SDL_events.h	2007-12-31 04:48:36 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_events.h	2018-04-23 16:20:33 +0000
+diff -ruN SDL-1.2.13/include/SDL_events.h SDL-1.2.13_new/include/SDL_events.h
+--- SDL-1.2.13/include/SDL_events.h	2007-12-31 06:48:36 +0200
++++ SDL-1.2.13_new/include/SDL_events.h	2022-09-11 18:22:31 +0300
 @@ -140,6 +140,7 @@
  	Uint8 button;	/* The mouse button index */
  	Uint8 state;	/* SDL_PRESSED or SDL_RELEASED */
@@ -12236,9 +12236,9 @@ diff -ruN SDL-1.2.13/include/SDL_events.h SDL-1.2.13_OOx64/include/SDL_events.h
  } SDL_MouseButtonEvent;
  
  /* Joystick axis motion event structure */
-diff -ruN SDL-1.2.13/include/SDL_haptic.h SDL-1.2.13_OOx64/include/SDL_haptic.h
---- SDL-1.2.13/include/SDL_haptic.h	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/SDL_haptic.h	2017-12-19 13:54:51 +0000
+diff -ruN SDL-1.2.13/include/SDL_haptic.h SDL-1.2.13_new/include/SDL_haptic.h
+--- SDL-1.2.13/include/SDL_haptic.h	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/SDL_haptic.h	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1136 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -13376,9 +13376,20 @@ diff -ruN SDL-1.2.13/include/SDL_haptic.h SDL-1.2.13_OOx64/include/SDL_haptic.h
 +
 +/* vi: set ts=4 sw=4 expandtab: */
 +
-diff -ruN SDL-1.2.13/include/d3dtypes.h_ SDL-1.2.13_OOx64/include/d3dtypes.h_
---- SDL-1.2.13/include/d3dtypes.h_	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/d3dtypes.h_	1999-11-19 17:32:22 +0000
+diff -ruN SDL-1.2.13/include/SDL_video.h SDL-1.2.13_new/include/SDL_video.h
+--- SDL-1.2.13/include/SDL_video.h	2007-12-31 06:48:36 +0200
++++ SDL-1.2.13_new/include/SDL_video.h	2022-09-06 08:32:20 +0300
+@@ -203,6 +203,7 @@
+     SDL_GL_GREEN_SIZE,
+     SDL_GL_BLUE_SIZE,
+     SDL_GL_ALPHA_SIZE,
++	SDL_GL_PIXEL_TYPE_FLOAT,
+     SDL_GL_BUFFER_SIZE,
+     SDL_GL_DOUBLEBUFFER,
+     SDL_GL_DEPTH_SIZE,
+diff -ruN SDL-1.2.13/include/d3dtypes.h_ SDL-1.2.13_new/include/d3dtypes.h_
+--- SDL-1.2.13/include/d3dtypes.h_	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/d3dtypes.h_	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1698 @@
 +/*==========================================================================;
 + *
@@ -15078,9 +15089,9 @@ diff -ruN SDL-1.2.13/include/d3dtypes.h_ SDL-1.2.13_OOx64/include/d3dtypes.h_
 +#pragma pack()
 +#endif /* _D3DTYPES_H_ */
 +
-diff -ruN SDL-1.2.13/include/ddraw.h SDL-1.2.13_OOx64/include/ddraw.h
---- SDL-1.2.13/include/ddraw.h	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/ddraw.h	1999-11-19 17:32:22 +0000
+diff -ruN SDL-1.2.13/include/ddraw.h SDL-1.2.13_new/include/ddraw.h
+--- SDL-1.2.13/include/ddraw.h	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/ddraw.h	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,4844 @@
 +/*==========================================================================;
 + *
@@ -19926,9 +19937,9 @@ diff -ruN SDL-1.2.13/include/ddraw.h SDL-1.2.13_OOx64/include/ddraw.h
 +
 +#endif
 +
-diff -ruN SDL-1.2.13/include/dinput.h___ SDL-1.2.13_OOx64/include/dinput.h___
---- SDL-1.2.13/include/dinput.h___	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/dinput.h___	1999-11-19 17:32:22 +0000
+diff -ruN SDL-1.2.13/include/dinput.h___ SDL-1.2.13_new/include/dinput.h___
+--- SDL-1.2.13/include/dinput.h___	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/dinput.h___	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1849 @@
 +/****************************************************************************
 + *
@@ -21779,9 +21790,9 @@ diff -ruN SDL-1.2.13/include/dinput.h___ SDL-1.2.13_OOx64/include/dinput.h___
 +#endif  /* _INC_MMDDK */
 +
 +#endif /* DIJ_RINGZERO */
-diff -ruN SDL-1.2.13/include/directx.h SDL-1.2.13_OOx64/include/directx.h
---- SDL-1.2.13/include/directx.h	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/directx.h	1999-11-19 17:32:22 +0000
+diff -ruN SDL-1.2.13/include/directx.h SDL-1.2.13_new/include/directx.h
+--- SDL-1.2.13/include/directx.h	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/directx.h	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,79 @@
 +
 +#ifndef _directx_h_
@@ -21862,9 +21873,9 @@ diff -ruN SDL-1.2.13/include/directx.h SDL-1.2.13_OOx64/include/directx.h
 +#include <dinput.h>
 +
 +#endif /* _directx_h */
-diff -ruN SDL-1.2.13/include/dsound.h SDL-1.2.13_OOx64/include/dsound.h
---- SDL-1.2.13/include/dsound.h	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/include/dsound.h	2002-05-18 08:58:56 +0000
+diff -ruN SDL-1.2.13/include/dsound.h SDL-1.2.13_new/include/dsound.h
+--- SDL-1.2.13/include/dsound.h	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/include/dsound.h	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,863 @@
 +/*==========================================================================;
 + *
@@ -22729,14 +22740,9 @@ diff -ruN SDL-1.2.13/include/dsound.h SDL-1.2.13_OOx64/include/dsound.h
 +#endif // __cplusplus
 +
 +#endif  // __DSOUND_INCLUDED__ 
-Files SDL-1.2.13/lib/libddraw.a and SDL-1.2.13_OOx64/lib/libddraw.a differ
-Files SDL-1.2.13/lib/libdinput.a and SDL-1.2.13_OOx64/lib/libdinput.a differ
-Files SDL-1.2.13/lib/libdplayx.a and SDL-1.2.13_OOx64/lib/libdplayx.a differ
-Files SDL-1.2.13/lib/libdsound.a and SDL-1.2.13_OOx64/lib/libdsound.a differ
-Files SDL-1.2.13/lib/libdxguid.a and SDL-1.2.13_OOx64/lib/libdxguid.a differ
-diff -ruN SDL-1.2.13/libtool SDL-1.2.13_OOx64/libtool
---- SDL-1.2.13/libtool	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/libtool	2017-12-19 18:34:53 +0000
+diff -ruN SDL-1.2.13/libtool SDL-1.2.13_new/libtool
+--- SDL-1.2.13/libtool	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/libtool	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,7546 @@
 +#! /bin/sh
 +
@@ -30284,9 +30290,9 @@ diff -ruN SDL-1.2.13/libtool SDL-1.2.13_OOx64/libtool
 +
 +# ### END LIBTOOL TAG CONFIG: CXX
 +
-diff -ruN SDL-1.2.13/sdl-config SDL-1.2.13_OOx64/sdl-config
---- SDL-1.2.13/sdl-config	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/sdl-config	2013-10-03 18:42:34 +0000
+diff -ruN SDL-1.2.13/sdl-config SDL-1.2.13_new/sdl-config
+--- SDL-1.2.13/sdl-config	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/sdl-config	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,60 @@
 +#!/bin/sh
 +
@@ -30348,9 +30354,9 @@ diff -ruN SDL-1.2.13/sdl-config SDL-1.2.13_OOx64/sdl-config
 +  esac
 +  shift
 +done
-diff -ruN SDL-1.2.13/sdl.pc SDL-1.2.13_OOx64/sdl.pc
---- SDL-1.2.13/sdl.pc	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/sdl.pc	2013-10-03 18:42:36 +0000
+diff -ruN SDL-1.2.13/sdl.pc SDL-1.2.13_new/sdl.pc
+--- SDL-1.2.13/sdl.pc	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/sdl.pc	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,14 @@
 +# sdl pkg-config source file
 +
@@ -30366,9 +30372,9 @@ diff -ruN SDL-1.2.13/sdl.pc SDL-1.2.13_OOx64/sdl.pc
 +Conflicts:
 +Libs: -L${libdir}  -lmingw32 -lSDLmain -lSDL  -mwindows
 +Cflags: -I${includedir}/SDL -D_GNU_SOURCE=1 -Dmain=SDL_main
-diff -ruN SDL-1.2.13/src/SDL.c SDL-1.2.13_OOx64/src/SDL.c
---- SDL-1.2.13/src/SDL.c	2007-12-31 04:48:16 +0000
-+++ SDL-1.2.13_OOx64/src/SDL.c	2017-12-19 14:03:10 +0000
+diff -ruN SDL-1.2.13/src/SDL.c SDL-1.2.13_new/src/SDL.c
+--- SDL-1.2.13/src/SDL.c	2007-12-31 06:48:16 +0200
++++ SDL-1.2.13_new/src/SDL.c	2022-09-11 18:22:31 +0300
 @@ -38,6 +38,10 @@
  extern int  SDL_JoystickInit(void);
  extern void SDL_JoystickQuit(void);
@@ -30452,9 +30458,9 @@ diff -ruN SDL-1.2.13/src/SDL.c SDL-1.2.13_OOx64/src/SDL.c
  	SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
  
  #ifdef CHECK_LEAKS
-diff -ruN SDL-1.2.13/src/SDL.c.bak SDL-1.2.13_OOx64/src/SDL.c.bak
---- SDL-1.2.13/src/SDL.c.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/SDL.c.bak	2007-12-30 18:48:16 +0000
+diff -ruN SDL-1.2.13/src/SDL.c.bak SDL-1.2.13_new/src/SDL.c.bak
+--- SDL-1.2.13/src/SDL.c.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/SDL.c.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,350 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -30806,9 +30812,9 @@ diff -ruN SDL-1.2.13/src/SDL.c.bak SDL-1.2.13_OOx64/src/SDL.c.bak
 +#endif /* building DLL with Watcom C */
 +
 +#endif /* OS/2 elif __WIN32__ */
-diff -ruN SDL-1.2.13/src/SDL_HelperWindow.c SDL-1.2.13_OOx64/src/SDL_HelperWindow.c
---- SDL-1.2.13/src/SDL_HelperWindow.c	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/SDL_HelperWindow.c	2017-12-20 12:22:43 +0000
+diff -ruN SDL-1.2.13/src/SDL_HelperWindow.c SDL-1.2.13_new/src/SDL_HelperWindow.c
+--- SDL-1.2.13/src/SDL_HelperWindow.c	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/SDL_HelperWindow.c	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,154 @@
 +#define UNICODE 1
 +#include "SDL_config.h"
@@ -30964,9 +30970,9 @@ diff -ruN SDL-1.2.13/src/SDL_HelperWindow.c SDL-1.2.13_OOx64/src/SDL_HelperWindo
 +{
 +    return WIN_SetErrorFromHRESULT(prefix, GetLastError());
 +}
-diff -ruN SDL-1.2.13/src/darwin/SDL_syshaptic.c SDL-1.2.13_OOx64/src/darwin/SDL_syshaptic.c
---- SDL-1.2.13/src/darwin/SDL_syshaptic.c	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/darwin/SDL_syshaptic.c	2017-12-18 15:08:54 +0000
+diff -ruN SDL-1.2.13/src/darwin/SDL_syshaptic.c SDL-1.2.13_new/src/darwin/SDL_syshaptic.c
+--- SDL-1.2.13/src/darwin/SDL_syshaptic.c	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/darwin/SDL_syshaptic.c	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1284 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -32253,9 +32259,9 @@ diff -ruN SDL-1.2.13/src/darwin/SDL_syshaptic.c SDL-1.2.13_OOx64/src/darwin/SDL_
 +
 +#endif /* SDL_HAPTIC_IOKIT */
 \ No newline at end of file
-diff -ruN SDL-1.2.13/src/darwin/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/darwin/SDL_syshaptic.c.bak
---- SDL-1.2.13/src/darwin/SDL_syshaptic.c.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/darwin/SDL_syshaptic.c.bak	2017-12-18 13:27:38 +0000
+diff -ruN SDL-1.2.13/src/darwin/SDL_syshaptic.c.bak SDL-1.2.13_new/src/darwin/SDL_syshaptic.c.bak
+--- SDL-1.2.13/src/darwin/SDL_syshaptic.c.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/darwin/SDL_syshaptic.c.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1284 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -33541,9 +33547,9 @@ diff -ruN SDL-1.2.13/src/darwin/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/darwin/
 +
 +
 +#endif /* SDL_HAPTIC_IOKIT */
-diff -ruN SDL-1.2.13/src/dummy/SDL_syshaptic.c SDL-1.2.13_OOx64/src/dummy/SDL_syshaptic.c
---- SDL-1.2.13/src/dummy/SDL_syshaptic.c	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/dummy/SDL_syshaptic.c	2017-12-18 15:09:06 +0000
+diff -ruN SDL-1.2.13/src/dummy/SDL_syshaptic.c SDL-1.2.13_new/src/dummy/SDL_syshaptic.c
+--- SDL-1.2.13/src/dummy/SDL_syshaptic.c	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/dummy/SDL_syshaptic.c	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,193 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -33739,9 +33745,9 @@ diff -ruN SDL-1.2.13/src/dummy/SDL_syshaptic.c SDL-1.2.13_OOx64/src/dummy/SDL_sy
 +
 +#endif /* SDL_HAPTIC_DUMMY || SDL_HAPTIC_DISABLED */
 \ No newline at end of file
-diff -ruN SDL-1.2.13/src/dummy/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/dummy/SDL_syshaptic.c.bak
---- SDL-1.2.13/src/dummy/SDL_syshaptic.c.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/dummy/SDL_syshaptic.c.bak	2017-12-18 13:29:10 +0000
+diff -ruN SDL-1.2.13/src/dummy/SDL_syshaptic.c.bak SDL-1.2.13_new/src/dummy/SDL_syshaptic.c.bak
+--- SDL-1.2.13/src/dummy/SDL_syshaptic.c.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/dummy/SDL_syshaptic.c.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,193 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -33936,9 +33942,9 @@ diff -ruN SDL-1.2.13/src/dummy/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/dummy/SD
 +
 +
 +#endif /* SDL_HAPTIC_DUMMY || SDL_HAPTIC_DISABLED */
-diff -ruN SDL-1.2.13/src/events/SDL_events_c.h SDL-1.2.13_OOx64/src/events/SDL_events_c.h
---- SDL-1.2.13/src/events/SDL_events_c.h	2007-12-31 04:47:59 +0000
-+++ SDL-1.2.13_OOx64/src/events/SDL_events_c.h	2018-04-23 16:23:32 +0000
+diff -ruN SDL-1.2.13/src/events/SDL_events_c.h SDL-1.2.13_new/src/events/SDL_events_c.h
+--- SDL-1.2.13/src/events/SDL_events_c.h	2007-12-31 06:47:59 +0200
++++ SDL-1.2.13_new/src/events/SDL_events_c.h	2022-09-11 18:22:31 +0300
 @@ -57,7 +57,7 @@
  extern int SDL_PrivateAppActive(Uint8 gain, Uint8 state);
  extern int SDL_PrivateMouseMotion(Uint8 buttonstate, int relative,
@@ -33948,9 +33954,9 @@ diff -ruN SDL-1.2.13/src/events/SDL_events_c.h SDL-1.2.13_OOx64/src/events/SDL_e
  extern int SDL_PrivateKeyboard(Uint8 state, SDL_keysym *key);
  extern int SDL_PrivateResize(int w, int h);
  extern int SDL_PrivateExpose(void);
-diff -ruN SDL-1.2.13/src/events/SDL_mouse.c SDL-1.2.13_OOx64/src/events/SDL_mouse.c
---- SDL-1.2.13/src/events/SDL_mouse.c	2007-12-31 04:47:59 +0000
-+++ SDL-1.2.13_OOx64/src/events/SDL_mouse.c	2018-04-23 16:26:15 +0000
+diff -ruN SDL-1.2.13/src/events/SDL_mouse.c SDL-1.2.13_new/src/events/SDL_mouse.c
+--- SDL-1.2.13/src/events/SDL_mouse.c	2007-12-31 06:47:59 +0200
++++ SDL-1.2.13_new/src/events/SDL_mouse.c	2022-09-11 18:22:31 +0300
 @@ -60,7 +60,7 @@
  	Uint8 i;
  	for ( i = 0; i < sizeof(SDL_ButtonState)*8; ++i ) {
@@ -33977,9 +33983,9 @@ diff -ruN SDL-1.2.13/src/events/SDL_mouse.c SDL-1.2.13_OOx64/src/events/SDL_mous
  		if ( (SDL_EventOK == NULL) || (*SDL_EventOK)(&event) ) {
  			posted = 1;
  			SDL_PushEvent(&event);
-diff -ruN SDL-1.2.13/src/events/SDL_resize.c SDL-1.2.13_OOx64/src/events/SDL_resize.c
---- SDL-1.2.13/src/events/SDL_resize.c	2007-12-31 04:47:59 +0000
-+++ SDL-1.2.13_OOx64/src/events/SDL_resize.c	2009-03-07 19:56:02 +0000
+diff -ruN SDL-1.2.13/src/events/SDL_resize.c SDL-1.2.13_new/src/events/SDL_resize.c
+--- SDL-1.2.13/src/events/SDL_resize.c	2007-12-31 06:47:59 +0200
++++ SDL-1.2.13_new/src/events/SDL_resize.c	2022-09-11 18:22:31 +0300
 @@ -54,6 +54,11 @@
  	     ((w == SDL_VideoSurface->w) && (h == SDL_VideoSurface->h)) ) {
  		return(0);
@@ -33992,9 +33998,9 @@ diff -ruN SDL-1.2.13/src/events/SDL_resize.c SDL-1.2.13_OOx64/src/events/SDL_res
  
  	/* Pull out all old resize events */
  	SDL_PeepEvents(events, sizeof(events)/sizeof(events[0]),
-diff -ruN SDL-1.2.13/src/events/SDL_resize.c.original SDL-1.2.13_OOx64/src/events/SDL_resize.c.original
---- SDL-1.2.13/src/events/SDL_resize.c.original	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/events/SDL_resize.c.original	2007-12-30 18:48:00 +0000
+diff -ruN SDL-1.2.13/src/events/SDL_resize.c.original SDL-1.2.13_new/src/events/SDL_resize.c.original
+--- SDL-1.2.13/src/events/SDL_resize.c.original	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/events/SDL_resize.c.original	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,75 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -34071,9 +34077,9 @@ diff -ruN SDL-1.2.13/src/events/SDL_resize.c.original SDL-1.2.13_OOx64/src/event
 +	}
 +	return(posted);
 +}
-diff -ruN SDL-1.2.13/src/haptic/SDL_haptic.c SDL-1.2.13_OOx64/src/haptic/SDL_haptic.c
---- SDL-1.2.13/src/haptic/SDL_haptic.c	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/haptic/SDL_haptic.c	2017-12-18 15:11:50 +0000
+diff -ruN SDL-1.2.13/src/haptic/SDL_haptic.c SDL-1.2.13_new/src/haptic/SDL_haptic.c
+--- SDL-1.2.13/src/haptic/SDL_haptic.c	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/haptic/SDL_haptic.c	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,689 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -34764,9 +34770,9 @@ diff -ruN SDL-1.2.13/src/haptic/SDL_haptic.c SDL-1.2.13_OOx64/src/haptic/SDL_hap
 +
 +   return SDL_SYS_HapticStopAll(haptic);
 +}
-diff -ruN SDL-1.2.13/src/haptic/SDL_syshaptic.h SDL-1.2.13_OOx64/src/haptic/SDL_syshaptic.h
---- SDL-1.2.13/src/haptic/SDL_syshaptic.h	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/haptic/SDL_syshaptic.h	2017-12-18 15:12:00 +0000
+diff -ruN SDL-1.2.13/src/haptic/SDL_syshaptic.h SDL-1.2.13_new/src/haptic/SDL_syshaptic.h
+--- SDL-1.2.13/src/haptic/SDL_syshaptic.h	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/haptic/SDL_syshaptic.h	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,202 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -34970,9 +34976,9 @@ diff -ruN SDL-1.2.13/src/haptic/SDL_syshaptic.h SDL-1.2.13_OOx64/src/haptic/SDL_
 + * Returns 0 on success, -1 on error.
 + */
 +extern int SDL_SYS_HapticStopAll(SDL_Haptic * haptic);
-diff -ruN SDL-1.2.13/src/haptic/darwin/SDL_syshaptic.c SDL-1.2.13_OOx64/src/haptic/darwin/SDL_syshaptic.c
---- SDL-1.2.13/src/haptic/darwin/SDL_syshaptic.c	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/haptic/darwin/SDL_syshaptic.c	2017-12-18 15:08:54 +0000
+diff -ruN SDL-1.2.13/src/haptic/darwin/SDL_syshaptic.c SDL-1.2.13_new/src/haptic/darwin/SDL_syshaptic.c
+--- SDL-1.2.13/src/haptic/darwin/SDL_syshaptic.c	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/haptic/darwin/SDL_syshaptic.c	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1284 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -36259,9 +36265,9 @@ diff -ruN SDL-1.2.13/src/haptic/darwin/SDL_syshaptic.c SDL-1.2.13_OOx64/src/hapt
 +
 +#endif /* SDL_HAPTIC_IOKIT */
 \ No newline at end of file
-diff -ruN SDL-1.2.13/src/haptic/darwin/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/haptic/darwin/SDL_syshaptic.c.bak
---- SDL-1.2.13/src/haptic/darwin/SDL_syshaptic.c.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/haptic/darwin/SDL_syshaptic.c.bak	2017-12-18 13:27:38 +0000
+diff -ruN SDL-1.2.13/src/haptic/darwin/SDL_syshaptic.c.bak SDL-1.2.13_new/src/haptic/darwin/SDL_syshaptic.c.bak
+--- SDL-1.2.13/src/haptic/darwin/SDL_syshaptic.c.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/haptic/darwin/SDL_syshaptic.c.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1284 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -37547,9 +37553,9 @@ diff -ruN SDL-1.2.13/src/haptic/darwin/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/
 +
 +
 +#endif /* SDL_HAPTIC_IOKIT */
-diff -ruN SDL-1.2.13/src/haptic/dummy/SDL_syshaptic.c SDL-1.2.13_OOx64/src/haptic/dummy/SDL_syshaptic.c
---- SDL-1.2.13/src/haptic/dummy/SDL_syshaptic.c	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/haptic/dummy/SDL_syshaptic.c	2017-12-18 15:09:06 +0000
+diff -ruN SDL-1.2.13/src/haptic/dummy/SDL_syshaptic.c SDL-1.2.13_new/src/haptic/dummy/SDL_syshaptic.c
+--- SDL-1.2.13/src/haptic/dummy/SDL_syshaptic.c	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/haptic/dummy/SDL_syshaptic.c	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,193 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -37745,9 +37751,9 @@ diff -ruN SDL-1.2.13/src/haptic/dummy/SDL_syshaptic.c SDL-1.2.13_OOx64/src/hapti
 +
 +#endif /* SDL_HAPTIC_DUMMY || SDL_HAPTIC_DISABLED */
 \ No newline at end of file
-diff -ruN SDL-1.2.13/src/haptic/dummy/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/haptic/dummy/SDL_syshaptic.c.bak
---- SDL-1.2.13/src/haptic/dummy/SDL_syshaptic.c.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/haptic/dummy/SDL_syshaptic.c.bak	2017-12-18 13:29:10 +0000
+diff -ruN SDL-1.2.13/src/haptic/dummy/SDL_syshaptic.c.bak SDL-1.2.13_new/src/haptic/dummy/SDL_syshaptic.c.bak
+--- SDL-1.2.13/src/haptic/dummy/SDL_syshaptic.c.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/haptic/dummy/SDL_syshaptic.c.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,193 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -37942,9 +37948,9 @@ diff -ruN SDL-1.2.13/src/haptic/dummy/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/h
 +
 +
 +#endif /* SDL_HAPTIC_DUMMY || SDL_HAPTIC_DISABLED */
-diff -ruN SDL-1.2.13/src/haptic/linux/SDL_syshaptic.c SDL-1.2.13_OOx64/src/haptic/linux/SDL_syshaptic.c
---- SDL-1.2.13/src/haptic/linux/SDL_syshaptic.c	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/haptic/linux/SDL_syshaptic.c	2017-12-18 15:09:16 +0000
+diff -ruN SDL-1.2.13/src/haptic/linux/SDL_syshaptic.c SDL-1.2.13_new/src/haptic/linux/SDL_syshaptic.c
+--- SDL-1.2.13/src/haptic/linux/SDL_syshaptic.c	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/haptic/linux/SDL_syshaptic.c	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,961 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -38908,9 +38914,9 @@ diff -ruN SDL-1.2.13/src/haptic/linux/SDL_syshaptic.c SDL-1.2.13_OOx64/src/hapti
 +
 +#endif /* SDL_HAPTIC_LINUX */
 \ No newline at end of file
-diff -ruN SDL-1.2.13/src/haptic/linux/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/haptic/linux/SDL_syshaptic.c.bak
---- SDL-1.2.13/src/haptic/linux/SDL_syshaptic.c.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/haptic/linux/SDL_syshaptic.c.bak	2017-12-18 13:30:26 +0000
+diff -ruN SDL-1.2.13/src/haptic/linux/SDL_syshaptic.c.bak SDL-1.2.13_new/src/haptic/linux/SDL_syshaptic.c.bak
+--- SDL-1.2.13/src/haptic/linux/SDL_syshaptic.c.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/haptic/linux/SDL_syshaptic.c.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,961 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -39873,9 +39879,9 @@ diff -ruN SDL-1.2.13/src/haptic/linux/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/h
 +
 +
 +#endif /* SDL_HAPTIC_LINUX */
-diff -ruN SDL-1.2.13/src/haptic/win32/SDL_syshaptic.c SDL-1.2.13_OOx64/src/haptic/win32/SDL_syshaptic.c
---- SDL-1.2.13/src/haptic/win32/SDL_syshaptic.c	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/haptic/win32/SDL_syshaptic.c	2017-12-20 15:03:05 +0000
+diff -ruN SDL-1.2.13/src/haptic/win32/SDL_syshaptic.c SDL-1.2.13_new/src/haptic/win32/SDL_syshaptic.c
+--- SDL-1.2.13/src/haptic/win32/SDL_syshaptic.c	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/haptic/win32/SDL_syshaptic.c	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1368 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -41246,9 +41252,9 @@ diff -ruN SDL-1.2.13/src/haptic/win32/SDL_syshaptic.c SDL-1.2.13_OOx64/src/hapti
 +
 +#endif /* SDL_HAPTIC_DINPUT */
 \ No newline at end of file
-diff -ruN SDL-1.2.13/src/hermes/mmx_main.asm SDL-1.2.13_OOx64/src/hermes/mmx_main.asm
---- SDL-1.2.13/src/hermes/mmx_main.asm	2007-12-31 04:47:53 +0000
-+++ SDL-1.2.13_OOx64/src/hermes/mmx_main.asm	2013-10-03 18:48:18 +0000
+diff -ruN SDL-1.2.13/src/hermes/mmx_main.asm SDL-1.2.13_new/src/hermes/mmx_main.asm
+--- SDL-1.2.13/src/hermes/mmx_main.asm	2007-12-31 06:47:53 +0200
++++ SDL-1.2.13_new/src/hermes/mmx_main.asm	2022-09-11 18:22:31 +0300
 @@ -11,7 +11,7 @@
  
  %include "common.inc"
@@ -41269,9 +41275,9 @@ diff -ruN SDL-1.2.13/src/hermes/mmx_main.asm SDL-1.2.13_OOx64/src/hermes/mmx_mai
  	push ebp
  	mov ebp,esp
  
-diff -ruN SDL-1.2.13/src/hermes/mmxp2_32.asm SDL-1.2.13_OOx64/src/hermes/mmxp2_32.asm
---- SDL-1.2.13/src/hermes/mmxp2_32.asm	2007-12-31 04:47:53 +0000
-+++ SDL-1.2.13_OOx64/src/hermes/mmxp2_32.asm	2013-10-03 18:48:28 +0000
+diff -ruN SDL-1.2.13/src/hermes/mmxp2_32.asm SDL-1.2.13_new/src/hermes/mmxp2_32.asm
+--- SDL-1.2.13/src/hermes/mmxp2_32.asm	2007-12-31 06:47:53 +0200
++++ SDL-1.2.13_new/src/hermes/mmxp2_32.asm	2022-09-11 18:22:31 +0300
 @@ -22,11 +22,11 @@
  
  %include "common.inc"
@@ -41334,9 +41340,9 @@ diff -ruN SDL-1.2.13/src/hermes/mmxp2_32.asm SDL-1.2.13_OOx64/src/hermes/mmxp2_3
  
  	load_immq mm7, mmx32_rgb555_mul
  _convert_bgr555_cheat:
-diff -ruN SDL-1.2.13/src/hermes/x86_main.asm SDL-1.2.13_OOx64/src/hermes/x86_main.asm
---- SDL-1.2.13/src/hermes/x86_main.asm	2007-12-31 04:47:53 +0000
-+++ SDL-1.2.13_OOx64/src/hermes/x86_main.asm	2013-10-03 18:48:32 +0000
+diff -ruN SDL-1.2.13/src/hermes/x86_main.asm SDL-1.2.13_new/src/hermes/x86_main.asm
+--- SDL-1.2.13/src/hermes/x86_main.asm	2007-12-31 06:47:53 +0200
++++ SDL-1.2.13_new/src/hermes/x86_main.asm	2022-09-11 18:22:31 +0300
 @@ -13,7 +13,7 @@
  
  %include "common.inc"
@@ -41355,9 +41361,9 @@ diff -ruN SDL-1.2.13/src/hermes/x86_main.asm SDL-1.2.13_OOx64/src/hermes/x86_mai
  	push ebp
  	mov ebp,esp
  
-diff -ruN SDL-1.2.13/src/hermes/x86p_16.asm SDL-1.2.13_OOx64/src/hermes/x86p_16.asm
---- SDL-1.2.13/src/hermes/x86p_16.asm	2007-12-31 04:47:53 +0000
-+++ SDL-1.2.13_OOx64/src/hermes/x86p_16.asm	2013-10-03 18:48:10 +0000
+diff -ruN SDL-1.2.13/src/hermes/x86p_16.asm SDL-1.2.13_new/src/hermes/x86p_16.asm
+--- SDL-1.2.13/src/hermes/x86p_16.asm	2007-12-31 06:47:53 +0200
++++ SDL-1.2.13_new/src/hermes/x86p_16.asm	2022-09-11 18:22:31 +0300
 @@ -14,16 +14,16 @@
  
  %include "common.inc"
@@ -41408,9 +41414,9 @@ diff -ruN SDL-1.2.13/src/hermes/x86p_16.asm SDL-1.2.13_OOx64/src/hermes/x86p_16.
  
      ; check short
      cmp ecx,BYTE 16
-diff -ruN SDL-1.2.13/src/hermes/x86p_32.asm SDL-1.2.13_OOx64/src/hermes/x86p_32.asm
---- SDL-1.2.13/src/hermes/x86p_32.asm	2007-12-31 04:47:53 +0000
-+++ SDL-1.2.13_OOx64/src/hermes/x86p_32.asm	2013-10-03 18:48:14 +0000
+diff -ruN SDL-1.2.13/src/hermes/x86p_32.asm SDL-1.2.13_new/src/hermes/x86p_32.asm
+--- SDL-1.2.13/src/hermes/x86p_32.asm	2007-12-31 06:47:53 +0200
++++ SDL-1.2.13_new/src/hermes/x86p_32.asm	2022-09-11 18:22:31 +0300
 @@ -13,16 +13,16 @@
  
  %include "common.inc"
@@ -41528,9 +41534,9 @@ diff -ruN SDL-1.2.13/src/hermes/x86p_32.asm SDL-1.2.13_OOx64/src/hermes/x86p_32.
  
  	
  .L_ALIGNED
-diff -ruN SDL-1.2.13/src/joystick/SDL_joystick.c SDL-1.2.13_OOx64/src/joystick/SDL_joystick.c
---- SDL-1.2.13/src/joystick/SDL_joystick.c	2007-12-31 04:47:55 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/SDL_joystick.c	2017-12-19 14:10:51 +0000
+diff -ruN SDL-1.2.13/src/joystick/SDL_joystick.c SDL-1.2.13_new/src/joystick/SDL_joystick.c
+--- SDL-1.2.13/src/joystick/SDL_joystick.c	2007-12-31 06:47:55 +0200
++++ SDL-1.2.13_new/src/joystick/SDL_joystick.c	2022-09-11 18:22:31 +0300
 @@ -190,7 +190,7 @@
  	return(opened);
  }
@@ -41630,9 +41636,9 @@ diff -ruN SDL-1.2.13/src/joystick/SDL_joystick.c SDL-1.2.13_OOx64/src/joystick/S
  		return;
  	}
  
-diff -ruN SDL-1.2.13/src/joystick/SDL_joystick.c.bak SDL-1.2.13_OOx64/src/joystick/SDL_joystick.c.bak
---- SDL-1.2.13/src/joystick/SDL_joystick.c.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/SDL_joystick.c.bak	2007-12-30 18:47:56 +0000
+diff -ruN SDL-1.2.13/src/joystick/SDL_joystick.c.bak SDL-1.2.13_new/src/joystick/SDL_joystick.c.bak
+--- SDL-1.2.13/src/joystick/SDL_joystick.c.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/joystick/SDL_joystick.c.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,573 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -42207,9 +42213,9 @@ diff -ruN SDL-1.2.13/src/joystick/SDL_joystick.c.bak SDL-1.2.13_OOx64/src/joysti
 +	return(state);
 +#endif /* SDL_EVENTS_DISABLED */
 +}
-diff -ruN SDL-1.2.13/src/joystick/SDL_joystick_c.h SDL-1.2.13_OOx64/src/joystick/SDL_joystick_c.h
---- SDL-1.2.13/src/joystick/SDL_joystick_c.h	2007-12-31 04:47:55 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/SDL_joystick_c.h	2017-12-19 14:11:09 +0000
+diff -ruN SDL-1.2.13/src/joystick/SDL_joystick_c.h SDL-1.2.13_new/src/joystick/SDL_joystick_c.h
+--- SDL-1.2.13/src/joystick/SDL_joystick_c.h	2007-12-31 06:47:55 +0200
++++ SDL-1.2.13_new/src/joystick/SDL_joystick_c.h	2022-09-11 18:22:31 +0300
 @@ -36,3 +36,6 @@
                                   Uint8 hat, Uint8 value);
  extern int SDL_PrivateJoystickButton(SDL_Joystick *joystick,
@@ -42217,9 +42223,9 @@ diff -ruN SDL-1.2.13/src/joystick/SDL_joystick_c.h SDL-1.2.13_OOx64/src/joystick
 +
 +/* Internal sanity checking functions */
 +extern int SDL_PrivateJoystickValid(SDL_Joystick ** joystick);
-diff -ruN SDL-1.2.13/src/joystick/SDL_joystick_c.h.bak SDL-1.2.13_OOx64/src/joystick/SDL_joystick_c.h.bak
---- SDL-1.2.13/src/joystick/SDL_joystick_c.h.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/SDL_joystick_c.h.bak	2007-12-30 18:47:56 +0000
+diff -ruN SDL-1.2.13/src/joystick/SDL_joystick_c.h.bak SDL-1.2.13_new/src/joystick/SDL_joystick_c.h.bak
+--- SDL-1.2.13/src/joystick/SDL_joystick_c.h.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/joystick/SDL_joystick_c.h.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,38 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -42259,9 +42265,9 @@ diff -ruN SDL-1.2.13/src/joystick/SDL_joystick_c.h.bak SDL-1.2.13_OOx64/src/joys
 +                                 Uint8 hat, Uint8 value);
 +extern int SDL_PrivateJoystickButton(SDL_Joystick *joystick,
 +                                     Uint8 button, Uint8 state);
-diff -ruN SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick.c SDL-1.2.13_OOx64/src/joystick/darwin/SDL_sysjoystick.c
---- SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick.c	2007-12-31 04:47:55 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/darwin/SDL_sysjoystick.c	2017-12-20 15:07:39 +0000
+diff -ruN SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick.c SDL-1.2.13_new/src/joystick/darwin/SDL_sysjoystick.c
+--- SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick.c	2007-12-31 06:47:55 +0200
++++ SDL-1.2.13_new/src/joystick/darwin/SDL_sysjoystick.c	2022-09-11 18:22:31 +0300
 @@ -48,59 +48,14 @@
  #include <CoreFoundation/CoreFoundation.h>
  #include <Carbon/Carbon.h> /* for NewPtrClear, DisposePtr */
@@ -42373,9 +42379,9 @@ diff -ruN SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick.c SDL-1.2.13_OOx64/src/
  		/* Add device to the end of the list */
  		if (lastDevice)
  			lastDevice->pNext = device;
-diff -ruN SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick.c.bak SDL-1.2.13_OOx64/src/joystick/darwin/SDL_sysjoystick.c.bak
---- SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick.c.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/darwin/SDL_sysjoystick.c.bak	2007-12-30 18:47:56 +0000
+diff -ruN SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick.c.bak SDL-1.2.13_new/src/joystick/darwin/SDL_sysjoystick.c.bak
+--- SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick.c.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/joystick/darwin/SDL_sysjoystick.c.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,846 @@
 +/*
 +	SDL - Simple DirectMedia Layer
@@ -43223,9 +43229,9 @@ diff -ruN SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick.c.bak SDL-1.2.13_OOx64/
 +}
 +
 +#endif /* SDL_JOYSTICK_IOKIT */
-diff -ruN SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick_c.h SDL-1.2.13_OOx64/src/joystick/darwin/SDL_sysjoystick_c.h
---- SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick_c.h	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/darwin/SDL_sysjoystick_c.h	2017-12-18 15:12:14 +0000
+diff -ruN SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick_c.h SDL-1.2.13_new/src/joystick/darwin/SDL_sysjoystick_c.h
+--- SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick_c.h	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/joystick/darwin/SDL_sysjoystick_c.h	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,87 @@
 +/*
 +	SDL - Simple DirectMedia Layer
@@ -43314,9 +43320,9 @@ diff -ruN SDL-1.2.13/src/joystick/darwin/SDL_sysjoystick_c.h SDL-1.2.13_OOx64/sr
 +
 +
 +#endif /* SDL_JOYSTICK_IOKIT_H */
-diff -ruN SDL-1.2.13/src/joystick/linux/SDL_sysjoystick.c SDL-1.2.13_OOx64/src/joystick/linux/SDL_sysjoystick.c
---- SDL-1.2.13/src/joystick/linux/SDL_sysjoystick.c	2007-12-31 04:47:54 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/linux/SDL_sysjoystick.c	2017-12-20 15:08:59 +0000
+diff -ruN SDL-1.2.13/src/joystick/linux/SDL_sysjoystick.c SDL-1.2.13_new/src/joystick/linux/SDL_sysjoystick.c
+--- SDL-1.2.13/src/joystick/linux/SDL_sysjoystick.c	2007-12-31 06:47:54 +0200
++++ SDL-1.2.13_new/src/joystick/linux/SDL_sysjoystick.c	2022-09-11 18:22:31 +0300
 @@ -31,13 +31,11 @@
  #include <sys/ioctl.h>
  #include <limits.h>		/* For the definition of PATH_MAX */
@@ -43397,9 +43403,9 @@ diff -ruN SDL-1.2.13/src/joystick/linux/SDL_sysjoystick.c SDL-1.2.13_OOx64/src/j
  
  	/* Set the joystick to non-blocking read mode */
  	fcntl(fd, F_SETFL, O_NONBLOCK);
-diff -ruN SDL-1.2.13/src/joystick/linux/SDL_sysjoystick.c.bak SDL-1.2.13_OOx64/src/joystick/linux/SDL_sysjoystick.c.bak
---- SDL-1.2.13/src/joystick/linux/SDL_sysjoystick.c.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/linux/SDL_sysjoystick.c.bak	2007-12-30 18:47:54 +0000
+diff -ruN SDL-1.2.13/src/joystick/linux/SDL_sysjoystick.c.bak SDL-1.2.13_new/src/joystick/linux/SDL_sysjoystick.c.bak
+--- SDL-1.2.13/src/joystick/linux/SDL_sysjoystick.c.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/joystick/linux/SDL_sysjoystick.c.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1198 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -44599,9 +44605,9 @@ diff -ruN SDL-1.2.13/src/joystick/linux/SDL_sysjoystick.c.bak SDL-1.2.13_OOx64/s
 +}
 +
 +#endif /* SDL_JOYSTICK_LINUX */
-diff -ruN SDL-1.2.13/src/joystick/linux/SDL_sysjoystick_c.h SDL-1.2.13_OOx64/src/joystick/linux/SDL_sysjoystick_c.h
---- SDL-1.2.13/src/joystick/linux/SDL_sysjoystick_c.h	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/linux/SDL_sysjoystick_c.h	2017-12-18 15:12:28 +0000
+diff -ruN SDL-1.2.13/src/joystick/linux/SDL_sysjoystick_c.h SDL-1.2.13_new/src/joystick/linux/SDL_sysjoystick_c.h
+--- SDL-1.2.13/src/joystick/linux/SDL_sysjoystick_c.h	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/joystick/linux/SDL_sysjoystick_c.h	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,55 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -44659,9 +44665,9 @@ diff -ruN SDL-1.2.13/src/joystick/linux/SDL_sysjoystick_c.h SDL-1.2.13_OOx64/src
 +#endif
 +};
 \ No newline at end of file
-diff -ruN SDL-1.2.13/src/joystick/win32/SDL_dxjoystick_c.h SDL-1.2.13_OOx64/src/joystick/win32/SDL_dxjoystick_c.h
---- SDL-1.2.13/src/joystick/win32/SDL_dxjoystick_c.h	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/joystick/win32/SDL_dxjoystick_c.h	2017-12-20 12:47:06 +0000
+diff -ruN SDL-1.2.13/src/joystick/win32/SDL_dxjoystick_c.h SDL-1.2.13_new/src/joystick/win32/SDL_dxjoystick_c.h
+--- SDL-1.2.13/src/joystick/win32/SDL_dxjoystick_c.h	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/joystick/win32/SDL_dxjoystick_c.h	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,81 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -44744,9 +44750,9 @@ diff -ruN SDL-1.2.13/src/joystick/win32/SDL_dxjoystick_c.h SDL-1.2.13_OOx64/src/
 +};
 +
 +#endif /* SDL_JOYSTICK_DINPUT_H */
-diff -ruN SDL-1.2.13/src/linux/SDL_syshaptic.c SDL-1.2.13_OOx64/src/linux/SDL_syshaptic.c
---- SDL-1.2.13/src/linux/SDL_syshaptic.c	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/linux/SDL_syshaptic.c	2017-12-18 15:09:16 +0000
+diff -ruN SDL-1.2.13/src/linux/SDL_syshaptic.c SDL-1.2.13_new/src/linux/SDL_syshaptic.c
+--- SDL-1.2.13/src/linux/SDL_syshaptic.c	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/linux/SDL_syshaptic.c	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,961 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -45710,9 +45716,9 @@ diff -ruN SDL-1.2.13/src/linux/SDL_syshaptic.c SDL-1.2.13_OOx64/src/linux/SDL_sy
 +
 +#endif /* SDL_HAPTIC_LINUX */
 \ No newline at end of file
-diff -ruN SDL-1.2.13/src/linux/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/linux/SDL_syshaptic.c.bak
---- SDL-1.2.13/src/linux/SDL_syshaptic.c.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/linux/SDL_syshaptic.c.bak	2017-12-18 13:30:26 +0000
+diff -ruN SDL-1.2.13/src/linux/SDL_syshaptic.c.bak SDL-1.2.13_new/src/linux/SDL_syshaptic.c.bak
+--- SDL-1.2.13/src/linux/SDL_syshaptic.c.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/linux/SDL_syshaptic.c.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,961 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -46675,9 +46681,41 @@ diff -ruN SDL-1.2.13/src/linux/SDL_syshaptic.c.bak SDL-1.2.13_OOx64/src/linux/SD
 +
 +
 +#endif /* SDL_HAPTIC_LINUX */
-diff -ruN SDL-1.2.13/src/video/wincommon/SDL_sysevents.c SDL-1.2.13_OOx64/src/video/wincommon/SDL_sysevents.c
---- SDL-1.2.13/src/video/wincommon/SDL_sysevents.c	2007-12-31 04:48:02 +0000
-+++ SDL-1.2.13_OOx64/src/video/wincommon/SDL_sysevents.c	2018-04-23 16:30:07 +0000
+diff -ruN SDL-1.2.13/src/video/SDL_sysvideo.h SDL-1.2.13_new/src/video/SDL_sysvideo.h
+--- SDL-1.2.13/src/video/SDL_sysvideo.h	2007-12-31 06:48:14 +0200
++++ SDL-1.2.13_new/src/video/SDL_sysvideo.h	2022-09-06 08:32:28 +0300
+@@ -281,6 +281,7 @@
+ 		int green_size;
+ 		int blue_size;
+ 		int alpha_size;
++		int pixel_type_rgba_float;
+ 		int depth_size;
+ 		int buffer_size;
+ 		int stencil_size;
+diff -ruN SDL-1.2.13/src/video/SDL_video.c SDL-1.2.13_new/src/video/SDL_video.c
+--- SDL-1.2.13/src/video/SDL_video.c	2007-12-31 06:48:14 +0200
++++ SDL-1.2.13_new/src/video/SDL_video.c	2022-09-06 10:08:09 +0300
+@@ -221,6 +221,7 @@
+ 	video->gl_config.green_size = 3;
+ 	video->gl_config.blue_size = 2;
+ 	video->gl_config.alpha_size = 0;
++	video->gl_config.pixel_type_rgba_float = 0;
+ 	video->gl_config.buffer_size = 0;
+ 	video->gl_config.depth_size = 16;
+ 	video->gl_config.stencil_size = 0;
+@@ -1442,6 +1443,9 @@
+ 		case SDL_GL_ALPHA_SIZE:
+ 			video->gl_config.alpha_size = value;
+ 			break;
++		case SDL_GL_PIXEL_TYPE_FLOAT:
++			video->gl_config.pixel_type_rgba_float = value;
++			break;
+ 		case SDL_GL_DOUBLEBUFFER:
+ 			video->gl_config.double_buffer = value;
+ 			break;
+diff -ruN SDL-1.2.13/src/video/wincommon/SDL_sysevents.c SDL-1.2.13_new/src/video/wincommon/SDL_sysevents.c
+--- SDL-1.2.13/src/video/wincommon/SDL_sysevents.c	2007-12-31 06:48:02 +0200
++++ SDL-1.2.13_new/src/video/wincommon/SDL_sysevents.c	2022-09-11 18:22:31 +0300
 @@ -307,14 +307,14 @@
  			state |= KMOD_RCTRL;
  			kstate[SDLK_RCTRL] = SDL_PRESSED;
@@ -46725,9 +46763,81 @@ diff -ruN SDL-1.2.13/src/video/wincommon/SDL_sysevents.c SDL-1.2.13_OOx64/src/vi
  				}
  			}
  			return(0);
-diff -ruN SDL-1.2.13/src/video/windib/SDL_dibvideo.c SDL-1.2.13_OOx64/src/video/windib/SDL_dibvideo.c
---- SDL-1.2.13/src/video/windib/SDL_dibvideo.c	2007-12-31 04:48:05 +0000
-+++ SDL-1.2.13_OOx64/src/video/windib/SDL_dibvideo.c	2012-04-23 09:26:00 +0000
+diff -ruN SDL-1.2.13/src/video/wincommon/SDL_wingl.c SDL-1.2.13_new/src/video/wincommon/SDL_wingl.c
+--- SDL-1.2.13/src/video/wincommon/SDL_wingl.c	2007-12-31 06:48:02 +0200
++++ SDL-1.2.13_new/src/video/wincommon/SDL_wingl.c	2022-09-06 14:11:24 +0300
+@@ -233,6 +233,11 @@
+ 		*iAttr++ = WGL_ALPHA_BITS_ARB;
+ 		*iAttr++ = this->gl_config.alpha_size;
+ 	}
++	
++	if ( this->gl_config.pixel_type_rgba_float ) {
++		*iAttr++ = WGL_PIXEL_TYPE_ARB;
++		*iAttr++ = WGL_TYPE_RGBA_FLOAT_ARB;
++	}
+ 
+ 	*iAttr++ = WGL_DOUBLE_BUFFER_ARB;
+ 	*iAttr++ = this->gl_config.double_buffer;
+@@ -469,15 +474,26 @@
+ 		    case SDL_GL_MULTISAMPLESAMPLES:
+ 			wgl_attrib = WGL_SAMPLES_ARB;
+ 			break;
+-		    case SDL_GL_ACCELERATED_VISUAL:
+-			wgl_attrib = WGL_ACCELERATION_ARB;
+-			this->gl_data->wglGetPixelFormatAttribivARB(GL_hdc, pixel_format, 0, 1, &wgl_attrib, value);
+-			if ( *value == WGL_NO_ACCELERATION_ARB ) {
+-				*value = SDL_FALSE;
+-			} else {
+-				*value = SDL_TRUE;
++		    case SDL_GL_ACCELERATED_VISUAL: {
++				wgl_attrib = WGL_ACCELERATION_ARB;
++				this->gl_data->wglGetPixelFormatAttribivARB(GL_hdc, pixel_format, 0, 1, &wgl_attrib, value);
++				if ( *value == WGL_NO_ACCELERATION_ARB ) {
++					*value = SDL_FALSE;
++				} else {
++					*value = SDL_TRUE;
++				}
++				return 0;
++			}
++			case SDL_GL_PIXEL_TYPE_FLOAT: {
++				wgl_attrib = WGL_PIXEL_TYPE_ARB;
++				this->gl_data->wglGetPixelFormatAttribivARB(GL_hdc, pixel_format, 0, 1, &wgl_attrib, value);
++				if ( *value == WGL_TYPE_RGBA_FLOAT_ARB ) {
++					*value = SDL_TRUE;
++				} else {
++					*value = SDL_FALSE;
++				}
++				return 0;
+ 			}
+-			return 0;
+ 		    default:
+ 			return(-1);
+ 		}
+@@ -549,6 +565,10 @@
+ 			return -1;
+ 		}
+ 		break;
++		case SDL_GL_PIXEL_TYPE_FLOAT:
++		// cannot query attribute unless WGL_ARB_pixel_format is 1
++		*value = -1;
++		break;
+ 	    default:
+ 		retval = -1;
+ 		break;
+diff -ruN SDL-1.2.13/src/video/wincommon/SDL_wingl_c.h SDL-1.2.13_new/src/video/wincommon/SDL_wingl_c.h
+--- SDL-1.2.13/src/video/wincommon/SDL_wingl_c.h	2007-12-31 06:48:02 +0200
++++ SDL-1.2.13_new/src/video/wincommon/SDL_wingl_c.h	2022-09-06 08:32:23 +0300
+@@ -124,6 +124,7 @@
+ #define WGL_SWAP_COPY_ARB              0x2029
+ #define WGL_SWAP_UNDEFINED_ARB         0x202A
+ #define WGL_TYPE_RGBA_ARB              0x202B
++#define WGL_TYPE_RGBA_FLOAT_ARB        0x21A0
+ #define WGL_TYPE_COLORINDEX_ARB        0x202C
+ #endif
+ 
+diff -ruN SDL-1.2.13/src/video/windib/SDL_dibvideo.c SDL-1.2.13_new/src/video/windib/SDL_dibvideo.c
+--- SDL-1.2.13/src/video/windib/SDL_dibvideo.c	2007-12-31 06:48:05 +0200
++++ SDL-1.2.13_new/src/video/windib/SDL_dibvideo.c	2022-09-11 18:22:31 +0300
 @@ -764,8 +764,12 @@
  		if ( screen_pal && (flags & (SDL_FULLSCREEN|SDL_HWPALETTE)) ) {
  			grab_palette = TRUE;
@@ -46743,9 +46853,9 @@ diff -ruN SDL-1.2.13/src/video/windib/SDL_dibvideo.c SDL-1.2.13_OOx64/src/video/
  	}
  #ifndef _WIN32_WCE
  	/* Resize the window */
-diff -ruN SDL-1.2.13/src/video/windib/SDL_dibvideo.c.original SDL-1.2.13_OOx64/src/video/windib/SDL_dibvideo.c.original
---- SDL-1.2.13/src/video/windib/SDL_dibvideo.c.original	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/src/video/windib/SDL_dibvideo.c.original	2007-12-30 17:48:06 +0000
+diff -ruN SDL-1.2.13/src/video/windib/SDL_dibvideo.c.original SDL-1.2.13_new/src/video/windib/SDL_dibvideo.c.original
+--- SDL-1.2.13/src/video/windib/SDL_dibvideo.c.original	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/src/video/windib/SDL_dibvideo.c.original	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,1247 @@
 +/*
 +    SDL - Simple DirectMedia Layer
@@ -47994,9 +48104,9 @@ diff -ruN SDL-1.2.13/src/video/windib/SDL_dibvideo.c.original SDL-1.2.13_OOx64/s
 +	return;
 +}
 +#endif
-diff -ruN SDL-1.2.13/src/video/windx5/SDL_dx5events.c SDL-1.2.13_OOx64/src/video/windx5/SDL_dx5events.c
---- SDL-1.2.13/src/video/windx5/SDL_dx5events.c	2007-12-31 04:48:13 +0000
-+++ SDL-1.2.13_OOx64/src/video/windx5/SDL_dx5events.c	2018-04-23 16:36:03 +0000
+diff -ruN SDL-1.2.13/src/video/windx5/SDL_dx5events.c SDL-1.2.13_new/src/video/windx5/SDL_dx5events.c
+--- SDL-1.2.13/src/video/windx5/SDL_dx5events.c	2007-12-31 06:48:13 +0200
++++ SDL-1.2.13_new/src/video/windx5/SDL_dx5events.c	2022-09-11 18:22:31 +0300
 @@ -370,7 +370,7 @@
  					if ( button == 3 ) button = 1;
  				}
@@ -48034,9 +48144,9 @@ diff -ruN SDL-1.2.13/src/video/windx5/SDL_dx5events.c SDL-1.2.13_OOx64/src/video
  				break;
  		}
  	}
-diff -ruN SDL-1.2.13/test/Makefile SDL-1.2.13_OOx64/test/Makefile
---- SDL-1.2.13/test/Makefile	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/test/Makefile	2017-12-19 14:05:50 +0000
+diff -ruN SDL-1.2.13/test/Makefile SDL-1.2.13_new/test/Makefile
+--- SDL-1.2.13/test/Makefile	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/test/Makefile	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,120 @@
 +# Makefile to build the SDL tests
 +
@@ -48158,9 +48268,9 @@ diff -ruN SDL-1.2.13/test/Makefile SDL-1.2.13_OOx64/test/Makefile
 +	rm -f Makefile
 +	rm -f config.status config.cache config.log
 +	rm -rf $(srcdir)/autom4te*
-diff -ruN SDL-1.2.13/test/Makefile.bak SDL-1.2.13_OOx64/test/Makefile.bak
---- SDL-1.2.13/test/Makefile.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/test/Makefile.bak	2013-10-03 19:02:00 +0000
+diff -ruN SDL-1.2.13/test/Makefile.bak SDL-1.2.13_new/test/Makefile.bak
+--- SDL-1.2.13/test/Makefile.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/test/Makefile.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,117 @@
 +# Makefile to build the SDL tests
 +
@@ -48279,9 +48389,9 @@ diff -ruN SDL-1.2.13/test/Makefile.bak SDL-1.2.13_OOx64/test/Makefile.bak
 +	rm -f Makefile
 +	rm -f config.status config.cache config.log
 +	rm -rf $(srcdir)/autom4te*
-diff -ruN SDL-1.2.13/test/Makefile.in SDL-1.2.13_OOx64/test/Makefile.in
---- SDL-1.2.13/test/Makefile.in	2007-12-31 04:48:35 +0000
-+++ SDL-1.2.13_OOx64/test/Makefile.in	2017-12-20 15:14:18 +0000
+diff -ruN SDL-1.2.13/test/Makefile.in SDL-1.2.13_new/test/Makefile.in
+--- SDL-1.2.13/test/Makefile.in	2007-12-31 06:48:35 +0200
++++ SDL-1.2.13_new/test/Makefile.in	2022-09-11 18:22:31 +0300
 @@ -7,10 +7,13 @@
  CFLAGS  = @CFLAGS@
  LIBS	= @LIBS@
@@ -48297,9 +48407,9 @@ diff -ruN SDL-1.2.13/test/Makefile.in SDL-1.2.13_OOx64/test/Makefile.in
  checkkeys$(EXE): $(srcdir)/checkkeys.c
  	$(CC) -o $@ $? $(CFLAGS) $(LIBS)
  
-diff -ruN SDL-1.2.13/test/Makefile.in.bak SDL-1.2.13_OOx64/test/Makefile.in.bak
---- SDL-1.2.13/test/Makefile.in.bak	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/test/Makefile.in.bak	2007-12-30 18:48:36 +0000
+diff -ruN SDL-1.2.13/test/Makefile.in.bak SDL-1.2.13_new/test/Makefile.in.bak
+--- SDL-1.2.13/test/Makefile.in.bak	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/test/Makefile.in.bak	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,117 @@
 +# Makefile to build the SDL tests
 +
@@ -48418,10 +48528,9 @@ diff -ruN SDL-1.2.13/test/Makefile.in.bak SDL-1.2.13_OOx64/test/Makefile.in.bak
 +	rm -f Makefile
 +	rm -f config.status config.cache config.log
 +	rm -rf $(srcdir)/autom4te*
-Files SDL-1.2.13/test/SDL.dll and SDL-1.2.13_OOx64/test/SDL.dll differ
-diff -ruN SDL-1.2.13/test/config.log SDL-1.2.13_OOx64/test/config.log
---- SDL-1.2.13/test/config.log	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/test/config.log	2013-10-03 19:00:42 +0000
+diff -ruN SDL-1.2.13/test/config.log SDL-1.2.13_new/test/config.log
+--- SDL-1.2.13/test/config.log	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/test/config.log	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,344 @@
 +This file contains any messages produced by compilers while
 +running configure, to aid debugging if configure makes a mistake.
@@ -48767,9 +48876,9 @@ diff -ruN SDL-1.2.13/test/config.log SDL-1.2.13_OOx64/test/config.log
 +#define PACKAGE_BUGREPORT ""
 +
 +configure: exit 0
-diff -ruN SDL-1.2.13/test/config.status SDL-1.2.13_OOx64/test/config.status
---- SDL-1.2.13/test/config.status	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/test/config.status	2013-10-03 19:00:40 +0000
+diff -ruN SDL-1.2.13/test/config.status SDL-1.2.13_new/test/config.status
+--- SDL-1.2.13/test/config.status	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/test/config.status	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,774 @@
 +#! /bin/sh
 +# Generated by configure.
@@ -49545,10 +49654,9 @@ diff -ruN SDL-1.2.13/test/config.status SDL-1.2.13_OOx64/test/config.status
 +
 +
 +{ (exit 0); exit 0; }
-Files SDL-1.2.13/test/libiconv-2.dll and SDL-1.2.13_OOx64/test/libiconv-2.dll differ
-diff -ruN SDL-1.2.13/test/stderr.txt SDL-1.2.13_OOx64/test/stderr.txt
---- SDL-1.2.13/test/stderr.txt	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/test/stderr.txt	2013-10-03 19:24:56 +0000
+diff -ruN SDL-1.2.13/test/stderr.txt SDL-1.2.13_new/test/stderr.txt
+--- SDL-1.2.13/test/stderr.txt	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/test/stderr.txt	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,10 @@
 +Creating Thread 0
 +Creating Thread 1
@@ -49560,9 +49668,9 @@ diff -ruN SDL-1.2.13/test/stderr.txt SDL-1.2.13_OOx64/test/stderr.txt
 +Creating Thread 7
 +Creating Thread 8
 +Creating Thread 9
-diff -ruN SDL-1.2.13/test/stdout.txt SDL-1.2.13_OOx64/test/stdout.txt
---- SDL-1.2.13/test/stdout.txt	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/test/stdout.txt	2013-10-03 19:24:56 +0000
+diff -ruN SDL-1.2.13/test/stdout.txt SDL-1.2.13_new/test/stdout.txt
+--- SDL-1.2.13/test/stdout.txt	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/test/stdout.txt	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,30 @@
 +Thread '0' waiting for signal
 +Thread '0' sending signals to subthreads
@@ -49594,9 +49702,9 @@ diff -ruN SDL-1.2.13/test/stdout.txt SDL-1.2.13_OOx64/test/stdout.txt
 +Thread '3' exiting!
 +Thread '5' exiting!
 +Thread '7' exiting!
-diff -ruN SDL-1.2.13/test/testhaptic.c SDL-1.2.13_OOx64/test/testhaptic.c
---- SDL-1.2.13/test/testhaptic.c	1970-01-01 00:00:00 +0000
-+++ SDL-1.2.13_OOx64/test/testhaptic.c	2017-12-18 18:58:48 +0000
+diff -ruN SDL-1.2.13/test/testhaptic.c SDL-1.2.13_new/test/testhaptic.c
+--- SDL-1.2.13/test/testhaptic.c	1970-01-01 02:00:00 +0200
++++ SDL-1.2.13_new/test/testhaptic.c	2022-09-11 18:22:31 +0300
 @@ -0,0 +1,247 @@
 +/*
 +Copyright (c) 2008, Edgar Simo Serra
